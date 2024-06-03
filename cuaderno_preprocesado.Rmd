@@ -495,9 +495,116 @@ print(medias_por_grupo)
 
 Este estimador sesgado revela que existen diferencias de medias entre los dos grupos. Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.
 
+Además, se puede comprobar con figuras como las siguientes que el emparejamiento de variables no sigue la misma distribución: 
+
+```{r}
+
+
+ggplot(df, aes(x = loan_amount_000s,fill = D)) + 
+          geom_density(alpha=0.5)+scale_y_continuous(limits=c(0,0.2))+
+          scale_x_continuous(limits=c(0,50))
+
+
+```
+
 
 Es por ello que aplicaremos matchit como preprocesamiento y, en base a un supuesto de independencia condicional, estudiaremos el efecto causal de D sobre Y dado X, donde X son el resto de variables observadas.
 
+```{r}
+
+df_aux <-  df
+for (col in colnames(df)) {
+  if (is.character(df[[col]])) {
+    df_aux[[col]] <- as.factor(df_aux[[col]])
+  }
+}
+
+head(df_aux)
+
+df <- df_aux
+```
+
+```{r}
+colnames(df)
+```
+```{r}
+
+set.seed(123)
+
+# Split the train indices into training and validation sets
+train_size <- floor(0.01 * length(train_ind))
+train_indices <- sample(train_ind, size = train_size)
+
+df_aux <- df[train_indices,]
+
+dim(df_aux)
 
 
+df_aux <- drop_na(df_aux)
+```
+
+
+```{r}
+
+library(MatchIt)
+m.ps.nn.1 <- matchit(y ~ agency_name +
+            property_type_name + loan_amount_000s + 
+            applicant_ethnicity_name + applicant_race_name_1 + 
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
+                  method="nearest",
+                  distance="cbps",
+                  data=df_aux) 
+
+
+m.ps.nn.1
+```
+
+```{r}
+love.plot(m.ps.nn.1,stats = c("m","var","ks"), 
+          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+          stars = "std")
+```
+
+
+```{r}
+m.ps.nn.2 <- matchit(y ~ agency_name +
+            property_type_name + loan_amount_000s + 
+            applicant_ethnicity_name + applicant_race_name_1 + 
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
+                  method="nearest",
+                  distance="mahalanobis",
+                  data=df_aux,
+            replace = TRUE) 
+
+
+m.ps.nn.2
+```
+```{r}
+
+
+love.plot(m.ps.nn.2,stats = c("m","var","ks"), 
+          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+          stars = "std")
+
+
+```
+
+
+```{r}
+
+library(ggplot2)
+library(reshape2)
+library(corrplot)
+
+# Suponiendo que tu dataframe se llama 'df'
+# Calcula la matriz de correlación
+cor_matrix <- cor(df[,sapply(df, is.numeric)], use = "complete.obs")
+
+# Convierte la matriz de correlación en un formato largo para ggplot2
+cor_data <- melt(cor_matrix)
+
+corrplot(cor_matrix, method = "color", type = "upper", 
+         tl.col = "black", tl.srt = 45)
+
+```
 
