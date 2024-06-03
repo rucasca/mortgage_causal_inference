@@ -249,22 +249,417 @@ Es por ello que primeramente tratamos de estudiar la relación mediante estadist
 
 
 
+```{r}
 
+na_col<-is.na(df_clean$applicant_income_000s)
 
+na_col_num <-  as.numeric(na_col)
 
-Visualizamos la distribución de 
+head(na_col)
+
+head(na_col_num)
+
+```
 
 ```{r}
+asociaciones_num <- c()
+asociaciones_cat <- c()
+
+
+j <- 1
+k <- 1
+
+for (i in colnames(df_clean)){
+  columna <- df_clean[[i]]
+  if(is.numeric(columna) && i!="applicant_income_000s"){
+    
+    na_col_num<-as.numeric(na_col)
+    
+    elems <- is.na(columna)
+    na_col_num<-na_col_num[!elems]
+    columna <- columna[!elems]
+    
+    asociaciones_num  <- c(asociaciones_num,cor(na_col_num, 
+                                                columna, method = "spearman"))
+    
+    names(asociaciones_num)[j] <- i
+    j<- j+1
+    
+  
+    
+  }
+  else if(i!="applicant_income_000s"){
+    na_col_fac <-  as.factor(na_col)
+    
+    elems <- is.na(columna)
+    
+    na_col_fac<-na_col_fac[!elems]
+    
+    columna <- columna[!elems]
+    
+    columna <- as.factor(columna)
+    
+    contingency_table <- table(na_col_fac, columna)
+
+
+
+    result <- chisq.test(contingency_table)
+    asociaciones_cat  <- c(asociaciones_cat,result$p.value)
+    names(asociaciones_cat)[k] <- i
+    k <- k + 1
+    
+   
+
+  }
+}
+```
+
+En primer lugar se observan los resultados del test respecto a las variables numéricas, donde se ha usado la correlación de spearman:
+
+```{r}
+print(asociaciones_num)
+
+```
+Se repite el procedimeinto usando el chi squared para las categóricas:
+
+```{r}
+
+print(asociaciones_cat)
+
+```
+
+Se representa graficamente un diagrama de mosaico con la variable con la que guarde más relación:
+
+```{r}
+library(ggplot2)
+row_sums <- apply(contingency_table, 1, sum)
+
+# Normaliza los datos dividiendo cada valor por la suma de la fila
+normalized_table <- contingency_table / row_sums
+
+# Convierte la tabla normalizada en un data frame
+df <- as.data.frame(as.table(normalized_table))
+
+# Gráfico de barras
+ggplot(df, aes(x = as.factor(na_col_fac), y = as.factor(columna))) +
+  geom_tile(aes(fill = Freq), color = "white") +
+  scale_fill_gradient(low = "blue", high = "red") +
+  geom_text(aes(label = round(Freq, 2)), vjust = 1) + # Añade la etiqueta de frecuencia
+  theme_minimal() +
+  labs(title = "Contingency Table Plot",
+       x = "applicant_income_000s",
+       y = "number_of_1_to_4_family_units",
+       fill = "Frecuencias")
+```
+
+
+
+Se tiene que la relación de la variable a imputar, en este caso la de la variable `applicant_income_000s` no guarda una relación evidente con alguna otra variable. Por ello, para tratar estudiar si es MAR pero existe multicolinealidad respecto a un subconjunto de variables, se implementa un modelo capaz de imputar los resultados:
+
+Dado que el conjutno de datos es muy grande para entrenar el modelo (casi medio millon de instancias) se parte de un subconjunto lo suficientemente grande que permita realizar la tarea.
+
+En primer lugar, se fija la semilla para garantizar la reproducibilidad:
+
+```{r}
+set.seed(123)
+```
+
+Se particiona en train test y validación, siendo train y validación conjuntos donde los valores de `applicant_income_000s` estan presentes y el conjunto de test el conjunto donde estos no lo estan:
+
+```{r}
+test_ind <- is.na(df_clean$applicant_income_000s)
+train_ind <- !test_ind
+
+
+test_ind <-which(test_ind)
+train_ind <- which(train_ind)
+
+
+train_size <- floor(0.1 * length(train_ind))
+train_indices <- sample(train_ind, size = train_size)
+validation_indices <- setdiff(train_ind, train_indices)
+
+train_indices <- sort(train_indices)
+
+validation_indices <- sort(validation_indices)
+```
+
+
+Una vez particionado el conjunto, se entrena el modelo con los datos: 
+
+```{r}
+train <- df_clean[train_indices,]
+
+dim(train)
+
+model <- randomForest(as.numeric(applicant_income_000s) ~ ., 
+                      data = train, importance = TRUE, ntree = 10)
+
+
+validation <- df_clean[validation_indices,]
+predictions <- predict(model, validation)
+```
+
+Se calculan las metricas de error en validación:
+
+```{r}
+actuals <- validation$applicant_income_000s
+
+mse <- mean((predictions - actuals)^2)
+print(paste("MSE:", mse))
+
+ss_res <- sum((actuals - predictions)^2)
+ss_tot <- sum((actuals - mean(actuals))^2)
+r_squared <- 1 - (ss_res / ss_tot)
+print(paste("R²:", r_squared))
+
+library(caret)
+postResample(predictions, actuals)
+```
+El resultado de $R^2$, que indica la varianza explicada de validación por el modelo, es insificiente para poder considerar una relación de nuestra valiable a imputar con el resto de las observables en el modelo. Es por ello por lo que podemos considerar que esta variable no es MAR.
+
+
+Con esto, las posibilidades son dos:
+
+- Es Missing Completely at Random, por lo que el valor se ha perdido de forma aleatoria.
+- Es Missing Not at Random, dependiendo de no observables.
+
+Ante estas dos posibilidades decidimos que lo más lógico es o bien la elimianción de las instancias que contengan en esta variable valores faltantes o bien la elimianción de la columna y pasar a tratarla como no observable.
+
+Dado que la proporción de datos perdidos es menor a un 10%, decidimos eliminar las instancias que contienen datos faltantes, pese a poder perder posibles efectos heterogéneos si fuera Missing Not At Random y existiera influencia de la variable.
+
+```{r}
+df <- df_clean
+
+df <- na.omit(df)
+
+df_clean <- df
+
+sum(is.na(df))
+```
+
+A continuación, realizamos un breve análisis exploratorio de los datos para eliminar posibles columnas redundantes no detectadas anteriormente.
+
+
+Por ello, aplicamos a los pares de columnas test estadísticos que nos aporten información de las relaciones par a par entre atributos.
+
+
+```{r}
+library(reshape2)
+library(corrplot)
+
+# Suponiendo que tu dataframe se llama 'df'
+# Calcula la matriz de correlación
+cor_matrix <- cor(df[,sapply(df, is.numeric)], use = "complete.obs")
+
+# Convierte la matriz de correlación en un formato largo para ggplot2
+cor_data <- melt(cor_matrix)
+
+corrplot(cor_matrix, method = "color", type = "upper", 
+         tl.col = "black", tl.srt = 45)
+```
+
+
+Antes de aplicar el estadistico en las categóricas, se castea a factor:
+
+
+```{r}
+df_aux <-  df
+for (col in colnames(df)) {
+  if (is.character(df[[col]])) {
+    df_aux[[col]] <- as.factor(df_aux[[col]])
+  }
+}
+
+head(df_aux)
+
+df <- df_aux
+```
+Asimismo, se cambia el nombre de las variables tratamiento y efecto para el primer estudio:
+
+
+```{r}
+df <- subset(df, select = -c(loan_purpose_name,action_taken_name))
+
+df$D <- as.factor(refinanzing)
+
+df$y <- denied
+
+head(df)
+```
+
+
+
+Respecto a las numéricas, no parece haber un par de variables cuya relación sea clara y pueda eliminarse una de ellas.
+
+```{r}
+# Crear una matriz vacía para almacenar los coeficientes de Cramér's V
+n <- length(colnames(df)[sapply(df, function(x) class(x) == "factor")])
+cramers_v_matrix <- matrix(0, n, n)
+colnames(cramers_v_matrix) <- colnames(df)[sapply(df, function(x) class(x) == "factor")]
+rownames(cramers_v_matrix) <- colnames(df)[sapply(df, function(x) class(x) == "factor")]
+
+# Rellenar la matriz con los coeficientes de Cramér's V
+for (i in 1:n) {
+  for (j in 1:n) {
+    if (i != j) {
+      cramers_v_matrix[i, j] <- cramers_v(df[[i]], df[[j]])
+    }
+  }
+}
+
+# Convierte la matriz en un formato largo para ggplot2
+cramers_v_data <- melt(cramers_v_matrix)
+
+# Crear un heatmap usando ggplot2
+ggplot(data = cramers_v_data, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0.5, limit = c(0, 1), space = "Lab",
+                       name="Cramér's V") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   size = 12, hjust = 1)) +
+  coord_fixed()
+```
+
+Lo mismo sucede con las categóricas, donde no parece haber un par donde una sea redundante, por lo que dejamos el dataframe como esta, ya que las variables donde el resultado es cercano al 0.5 no guardan una relación clara.
+
+
+
+En último lugar, revisamos más afondo las relaciones entre el tratamiento y la respuesta para el primer caso, donde tratamos de 
+
+```{r} 
+df_clean <- df
+
+matriz_confusion <- table(df_clean$D, df_clean$y)
+
+matriz_confusion
+
+mosaicplot(matriz_confusion, main="Matriz de Confusión: Loan Purpose vs Action Taken",
+           xlab="Loan Purpose", ylab="Action Taken", color=TRUE,
+           las=1, # Rotar etiquetas del eje y
+           cex.axis=0.8, # Tamaño de las etiquetas
+           cex.lab=0.9, # Tamaño de las etiquetas de los ejes
+           border="darkgray") # Color de las líneas de los bordes
+```
+
+
+
+Además, guardamos el dataframe preprocesado en un csv para poder usarlo en la segunda parte del entregable, realizada en python:
+
+```{r}
+write.csv(df, file = "datos_preprocesado.csv", row.names = FALSE)
 
 ```
 
 
 
+En último lugar, dado que existen demasiadas instancias en el actual conjunto de datos, trabajaremos con un sobconjunto completamente aleatorio que permita obtener resultados de nuestras muestras en tiempos de computación aceptables:
+
+
+
+```{r}
+library(dplyr)
+
+df <- df_clean
+
+# Definir la proporción deseada
+proporcion <- 0.05
+
+print(dim(df))
+
+# Seleccionar aleatoriamente la proporción deseada de filas
+df <- df %>% sample_frac(proporcion)
+
+print(dim(df))
+```
+
+
 ## Selección de instancias mediante pareamiento
+
+En primer lugar, se evalua la diferencia de medias agrupando por el tratamiento aplicado, para asi obtener el estimador sesgado por diferencia de medias:
+
+```{r}
+library(dplyr)
+
+# Agrupar por la columna 'grupo' y calcular la media de 'valor'
+medias_por_grupo <- df %>%
+  group_by(D) %>%
+  summarise(media_valor = mean(y))
+
+# Ver las medias por grupo
+print(medias_por_grupo)
+```
+
+Este estimador sesgado revela que existen diferencias de medias entre los dos grupos, en este caso que el tratamiento produce un efecto negativo en la variable respuesta. Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.
+
+Además, se puede comprobar con figuras como las siguientes que el emparejamiento de variables no sigue la misma distribución: 
+
+```{r}
+ggplot(df, aes(x = loan_amount_000s,fill = D)) + 
+          geom_density(alpha=0.5)+scale_y_continuous(limits=c(0,0.2))+
+          scale_x_continuous(limits=c(0,50))
+```
+
+En cambio para otras si que las distribuciones son similares:
+
+```{r}
+ggplot(df, aes(x = tract_to_msamd_income,fill = D)) + 
+          geom_density(alpha=0.5)
+```
+
+
+Es por ello que aplicaremos matchit como preprocesamiento y, en base a un supuesto de independencia condicional, estudiaremos el efecto causal de D sobre Y dado X, donde X son el resto de variables observadas.
+
+```{r}
+library(MatchIt)
+m.ps.nn.1 <- matchit(y ~ agency_name +
+            property_type_name + loan_amount_000s + 
+            applicant_ethnicity_name + applicant_race_name_1 + 
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
+                  method="nearest",
+                  distance="cbps",
+                  data=df_aux) 
+
+
+m.ps.nn.1
+```
+
+
+```{r}
+love.plot(m.ps.nn.1,stats = c("m","var","ks"), 
+          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+          stars = "std")
+```
+
+
+```{r}
+m.ps.nn.2 <- matchit(y ~ agency_name +
+            property_type_name + loan_amount_000s + 
+            applicant_ethnicity_name + applicant_race_name_1 + 
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
+                  method="nearest",
+                  distance="mahalanobis",
+                  data=df_aux,
+            replace = TRUE) 
+
+
+m.ps.nn.2
+```
+
+
+```{r}
+love.plot(m.ps.nn.2,stats = c("m","var","ks"), 
+          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+          stars = "std")
+
+```
 
 
 
 ## Evaluación del efecto del tratamiento
+
 
 
 
