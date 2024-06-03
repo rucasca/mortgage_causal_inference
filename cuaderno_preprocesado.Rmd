@@ -343,7 +343,7 @@ train_ind <- which(train_ind)
 
 set.seed(123)
 
-train_size <- floor(0.8 * length(train_ind))
+train_size <- floor(0.1 * length(train_ind))
 train_indices <- sample(train_ind, size = train_size)
 validation_indices <- setdiff(train_ind, train_indices)
 
@@ -354,26 +354,35 @@ validation_indices <- sort(validation_indices)
 
 ```
 
-
 Una vez particionado el conjunto, se entrena el modelo con los datos: 
+
 
 ```{r}
 library(randomForest)
 
 
-train <- df_clean[train_ind,]
+train <- df_clean[train_indices,]
 
-model <- randomForest(applicant_income_000s ~ ., 
-                      data = train, importance = TRUE, ntree = 20)
+dim(train)
+
+model <- randomForest(as.numeric(applicant_income_000s) ~ ., 
+                      data = train, importance = TRUE, ntree = 30)
 
 
+validation <- df_clean[validation_indices,]
+predictions <- predict(model, validation)
 
 ```
+
+
 
 
 Una vez entrenado se realiza la predicción del conjunto de validación para estudiar lo buenas que son las predicciones sobre datos etiquetados:
 
 ```{r}
+head(model$predicted)
+
+head(train$applicant_income_000s)
 
 ```
 
@@ -392,7 +401,7 @@ Una vez evaluados los resultados, se realiza la imputación de los NA usando el 
 ```
 
 
-
+Una vez hecho esto, se realiza
 
 
 
