@@ -309,20 +309,31 @@ asociaciones_cat
 El valor de la correlación de spearman para la mayoria de valores muestra que no existe relación entre cada variable respecto a `applicant_income_000s`. En cambio, para las categoricas usando chi squared si que parece existir relación. Obaservando la ultima tabla de contingencia se tiene: 
 
 
-```{r}
-library(ggplot2)
-df <- as.data.frame(as.table(contingency_table))
 
+
+```{r}
+
+library(ggplot2)
+row_sums <- apply(contingency_table, 1, sum)
+
+# Normaliza los datos dividiendo cada valor por la suma de la fila
+normalized_table <- contingency_table / row_sums
+
+# Convierte la tabla normalizada en un data frame
+df <- as.data.frame(as.table(normalized_table))
+
+# Gráfico de barras
 ggplot(df, aes(x = as.factor(na_col_fac), y = as.factor(columna))) +
   geom_tile(aes(fill = Freq), color = "white") +
   scale_fill_gradient(low = "blue", high = "red") +
-  geom_text(aes(label = Freq), vjust = 1) +
+  geom_text(aes(label = round(Freq, 2)), vjust = 1) + # Añade la etiqueta de frecuencia
   theme_minimal() +
   labs(title = "Contingency Table Plot",
        x = "applicant_income_000s",
        y = "number_of_1_to_4_family_units",
        fill = "Frecuencias")
 ```
+
 
 Dado que parece que a priori `applicant_income_000s` es MAR, se hará uso de un modelo para imputar sus valores faltantes. En este caso usamos random forest.
 
@@ -401,28 +412,92 @@ Una vez evaluados los resultados, se realiza la imputación de los NA usando el 
 ```
 
 
-Una vez hecho esto, se realiza
 
+
+
+### 
+
+Una vez obtenido el conjunto de datos preporcesado sin NAs, se lleva a cabo una selección mediante matching para tratar de estimar lo siguiente:
+
+
+1) Estimar el impacto del propósito de la hipoteca (loan purpose = "Refinancing") sobre rechazo de la misma (Action taken: denied)
+
+2) Estimar el efecto de __otras variables__
+
+
+
+Comenzamos con la estimación del impacto del proposito de la hipoteca
+
+```{r}
+library(tidyverse)
+library(MatchIt)
+library(cobalt)
+
+```
+
+```{r}
+head(df_clean$loan_purpose_name)
+```
 
 
 ```{r}
-correlation <- apply(df_clean, 2, function(x) cor(na_col, x, method = "spearman"))
+head(df_clean$action_taken_name)
+```
+Se transforman en columnas binarias, donde se coloca un 0 en el caso de un proposito distinto al de "Refinancing" y un 1 en el caso contrario. De la misma manera se imputa un 1 en el caso de ser denegada y un 0 en el caso contrario.
+
+
+```{r}
+
+df <- df_clean
+
+df <- na.omit(df)
 
 ```
 
 
 
 ```{r}
+refinanzing <- df$loan_purpose_name == "Refinancing"
+refinanzing <- as.numeric(refinanzing)
 
-# Ver el resumen estadístico de todas las variables
-summary(df)
+denied <- df$action_taken_name =="Loan originated"
+denied <- as.numeric(denied)
 ```
 
 
 ```{r}
-head(df$applicant_ethnicity_name)
 
-head(df$applicant_ethnicity)
+df <- subset(df, select = -c(loan_purpose_name,action_taken_name))
+
+df$D <- as.factor(refinanzing)
+
+df$y <- denied
+
+head(df)
+
 ```
+
+En primer lugar, se evalua la diferencia de medias agrupando por el tratamiento aplicado, para asi obtener el estimador sesgado por diferencia de medias:
+
+```{r}
+library(dplyr)
+
+# Agrupar por la columna 'grupo' y calcular la media de 'valor'
+medias_por_grupo <- df %>%
+  group_by(D) %>%
+  summarise(media_valor = mean(y))
+
+# Ver las medias por grupo
+print(medias_por_grupo)
+```
+
+
+
+Este estimador sesgado revela que existen diferencias de medias entre los dos grupos. Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.
+
+
+Es por ello que aplicaremos matchit como preprocesamiento y, en base a un supuesto de independencia condicional, estudiaremos el efecto causal de D sobre Y dado X, donde X son el resto de variables observadas.
+
+
 
 
