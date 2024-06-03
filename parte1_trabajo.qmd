@@ -11,6 +11,7 @@ Fichero número 1 donde se estudia la inferencia de causal de un un tratamiento 
 ## Indice 
 
 1) Introducción
+2) Carga del conjunto de datos
 2) AED y preprocesamiento de los datos
 3) Selección de instancias mediante pareamiento
 4) Evaluación del efecto del tratamiento
@@ -19,3 +20,253 @@ Fichero número 1 donde se estudia la inferencia de causal de un un tratamiento 
 
 ## Introducción
 
+
+A lo largo de nuestro proyecto se estudian diversas relaciones causales de un dataframe de la vida real, en nuestro caso relativo a la concesión de hipotecas, accedible mediante el siguiente (enlace)[https://www.consumerfinance.gov/data-research/hmda/]
+
+
+Este dataset almacena información anonima y tiene como objetivo ayudar a mostrar si los prestamistas están atendiendo las necesidades de vivienda de sus comunidades, proporcionar a los funcionarios públicos información que les ayuda a tomar decisiones y formular políticas y arrojar luz sobre los patrones de préstamos que podrían ser discriminatorios, como se indica en la pagina web donde se encuentra alojado el dataset.
+
+
+Es por ello que a lo largo de este estudio estudiaremos dos tipos de influencia, la relativa al efecto causal del  __EXPLICAR___
+
+
+## Carga del conjunto de datos
+
+Se carga el conjunto de datos, en nuestro caso decidimos usar el conjunto de datos de Washington del año más reciente posible, en este caso del 2017.
+
+```{r}
+library(readr)
+library(dplyr)
+library(graphics)
+```
+
+
+```{r}
+df <- read_csv("hmda_2017_wa_all-records_labels.csv")
+```
+
+Realizamos una primera visualización para estudiar si se han cargado correctamente los valores:
+
+```{r}
+head(df)
+```
+
+
+
+## AED y preprocesamiento de los datos
+
+Una vez cargado, realizamos un estudio rápido de los datos:
+
+```{r}
+resultados <- list()
+
+# Bucle para recorrer cada columna del dataframe
+for (col in colnames(df)) {
+  # Contar las frecuencias de los valores en la columna
+  frecuencias <- as.data.frame(table(df[[col]]))
+  # Ordenar las frecuencias de forma descendente
+  frecuencias <- frecuencias %>% arrange(desc(Freq))
+  # Seleccionar los 10 valores más frecuentes
+  top_10 <- head(frecuencias, 10)
+  # Guardar los resultados en la lista
+  resultados[[col]] <- top_10
+}
+
+# Mostrar los resultados
+
+```
+
+Se muestran solo las 5 primeras, aunque nosotros de forma manual visualizamos una por una
+
+```{r}
+head(resultados)
+```
+
+Se tiene que una gran cantidad de las columnas son redundantes, ya que existen columnas de codigos y categóricas que tienen el mismo significado. Esto posteriormente lo solucionaremos eliminando las columnas redundantes.
+
+En cuanto al tamaño del dataframe se tiene que este es:
+
+```{r}
+dim(df)
+```
+Se tiene que hay muchas instancias en el conjunto de datos, algo que puede ser un problema para métodos de matching que usen knn, con un orden de complejidad de $O(n^2)$.
+
+
+Tras esto, eliminamos las columnas redundantes y nos quedamos con las siguientes:
+
+- agency_name
+- loan_type_name
+- property_type_name
+- loan_purpose_name
+- owner_occupancy_name
+- loan_amount_000s 
+- preapproval_name
+- msamd_name
+- applicant_ethnicity_name
+- co_applicant_ethnicity_name
+- applicant_race_name_1
+- applicant_race_name_2
+- co_applicant_race_name_1 
+- applicant_sex_name
+- co_applicant_sex_name: una de nuestras variables tratamiento
+- applicant_income_000s
+- purchaser_type_name
+- rate_spread 
+- hoepa_status_name
+- lien_status_name
+- population 
+- minority_population
+- hud_median_family_income 
+- tract_to_msamd_income: indica la riqueza de la zona
+- tract_to_msamd_income 
+- number_of_owner_occupied_units 
+- number_of_1_to_4_family_units
+- action_taken_name: una de nuestras variables respuesta
+
+```{r}
+columnas <- c(
+  "agency_name",
+  "loan_type_name",
+  "property_type_name",
+  "loan_purpose_name",
+  "owner_occupancy_name",
+  "loan_amount_000s",
+  "preapproval_name",
+  "msamd_name",
+  "applicant_ethnicity_name",
+  "co_applicant_ethnicity_name",
+  "applicant_race_name_1",
+  "applicant_race_name_2",
+  "co_applicant_race_name_1",
+  "applicant_sex_name",
+  "co_applicant_sex_name",
+  "applicant_income_000s",
+  "purchaser_type_name",
+  "rate_spread",
+  "hoepa_status_name",
+  "lien_status_name",
+  "population",
+  "minority_population",
+  "hud_median_family_income",
+  "tract_to_msamd_income",
+  "number_of_owner_occupied_units",
+  "number_of_1_to_4_family_units",
+  'action_taken_name'
+)
+df_clean <- df %>% select(columnas)
+
+df <- df_clean
+```
+
+
+Tras esto, exploramos la distribución de valores faltantes NA en el conjunto de datos. Antes de esto, cabe recordar la clasificación de valores faltantes de acuerdo a su origen, donde se tienen los siguientes tipos:
+
+1) Missing Completely at Random (MCAR): los datos faltantes son independientes tanto de las variables observadas como de las no observadas
+
+
+2) Missing at Random (MAR): los datos faltantes dependen de variables observadas pero no de las no observadas.
+
+
+3) Missing Not at Random (MNAR): los datos faltantes dependen de las propias variables no observadas.
+
+Tratamos de estudiar si la varaible en cuestion en MAR
+
+```{r}
+# Contar el número de NA en cada columna
+na_prop <- sapply(df_clean, function(x) sum(is.na(x))/dim(df_clean)[1])
+
+# Mostrar el número de NA en cada columna
+print(na_prop)
+
+```
+
+La gran mayoria se tiene que no poseen valores faltantes, si se filtra por si poseen valores faltantes se obtiene:
+
+```{r}
+na_prop <- sapply(df_clean, function(x) sum(is.na(x))/dim(df_clean)[1])
+
+na_prop <- na_prop[na_prop!=0]
+
+# Mostrar el número de NA en cada columna
+print(na_prop)
+```
+
+De entre las variables con NAs, se decide eliminar aquellas que tienen una proporción de NAs muy alta, por encima del 90%, independientemente del tipo de valor faltante presente.
+
+```{r}
+
+df_clean <- df_clean[, !names(df_clean) %in% c("msamd_name",
+                                               "rate_spread", "applicant_race_name_2")]
+```
+
+
+Con esto, se tiene:
+
+```{r}
+na_prop <- sapply(df_clean, function(x) sum(is.na(x))/dim(df_clean)[1])
+
+na_prop <- na_prop[na_prop!=0]
+
+# Mostrar el número de NA en cada columna
+print(na_prop)
+
+```
+Para la imputación de valores de columnas donde la presencia de NAs es menor al 0.2%, simplemente eliminamos las instancias que los contienen ya que la perdida de datos es mínima.
+
+```{r}
+vars <- c ("minority_population" ,"tract_to_msamd_income",
+           "number_of_1_to_4_family_units","population","hud_median_family_income",
+           "number_of_owner_occupied_units")
+
+
+df_aux <- df_clean
+df_aux <- df_aux[,vars]
+
+filas_con_na <- rowSums(is.na(df_aux)) > 0
+
+df_aux <- df_aux[!filas_con_na,]
+
+
+df_clean <- df_clean[!filas_con_na,]
+
+df <- df_clean
+```
+
+Se visualizan las variables restantes:
+
+```{r}
+na_prop <- sapply(df_clean, function(x) sum(is.na(x))/dim(df_clean)[1])
+
+na_prop <- na_prop[na_prop!=0]
+
+# Mostrar el número de NA en cada columna
+print(na_prop)
+```
+Se tiene que `applicant_income_000s` tiene un 10% aproximadamente de valores faltantes. Es por ello por lo que tratamos de identificar el tipo de NA presente. De tratarse de una variable Missing at Random, esta estaría relacionada con algunas de las otras variables presentes, y podría imputarse su valor mediante métodos de ML.
+
+
+Es por ello que primeramente tratamos de estudiar la relación mediante estadisticos para comparar de forma individual respecto a cada una de las variables del dataframe:
+
+
+
+
+
+
+Visualizamos la distribución de 
+
+```{r}
+
+```
+
+
+
+## Selección de instancias mediante pareamiento
+
+
+
+## Evaluación del efecto del tratamiento
+
+
+
+
+## Conclusiones
