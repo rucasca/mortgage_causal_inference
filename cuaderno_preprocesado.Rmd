@@ -607,4 +607,74 @@ corrplot(cor_matrix, method = "color", type = "upper",
          tl.col = "black", tl.srt = 45)
 
 ```
+```{r}
+df_bueno <- df
+df <- df_aux
+
+head(df)
+```
+
+
+```{r}
+library(vcd)
+library(ggplot2)
+library(reshape2)
+
+
+df <- df[,sapply(df, is.factor)]
+# Supongamos que tu dataframe se llama 'df' y contiene solo variables categóricas
+
+# Función para calcular Cramér's V
+cramers_v <- function(x, y) {
+  tbl <- table(x, y)
+  chi2 <- chisq.test(tbl)$statistic
+  n <- sum(tbl)
+  min_dim <- min(nrow(tbl) - 1, ncol(tbl) - 1)
+  return(sqrt(chi2 / (n * min_dim)))
+}
+
+# Crear una matriz vacía para almacenar los coeficientes de Cramér's V
+n <- ncol(df)
+cramers_v_matrix <- matrix(0, n, n)
+colnames(cramers_v_matrix) <- colnames(df)
+rownames(cramers_v_matrix) <- colnames(df)
+
+# Rellenar la matriz con los coeficientes de Cramér's V
+for (i in 1:n) {
+  for (j in 1:n) {
+    if (i != j) {
+      cramers_v_matrix[i, j] <- cramers_v(df[[i]], df[[j]])
+    }
+  }
+}
+
+# Convierte la matriz en un formato largo para ggplot2
+cramers_v_data <- melt(cramers_v_matrix)
+
+# Crear un heatmap usando ggplot2
+ggplot(data = cramers_v_data, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0.5, limit = c(0, 1), space = "Lab",
+                       name="Cramér's V") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   size = 12, hjust = 1)) +
+  coord_fixed()
+
+```
+
+
+
+```{r}
+library(vcd)
+contingency_table <- table(df$lien_status_name, df$agency_name)
+
+# Plot the mosaic plot
+mosaic(contingency_table, shade = TRUE, legend = TRUE)
+```
+```{r}
+plot(table(df$co_applicant_race_name_1, df$co_applicant_sex_name))
+
+```
 

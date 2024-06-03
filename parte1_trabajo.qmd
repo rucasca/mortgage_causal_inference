@@ -1,0 +1,21 @@
+
+# TRABAJO GRUPO tiburonesML
+
+Fichero número 1 donde se estudia la inferencia de causal de un un tratamiento en una variable mediante métodos de pareamiento. Los integrantes del proyecto son los siguientes:
+
+- Manuel Rubio Martínez 
+- Carlos Sanchez Polo 
+- Ruben Castillo Carrasco
+
+
+## Indice 
+
+1) Introducción
+2) AED y preprocesamiento de los datos
+3) Selección de instancias mediante pareamiento
+4) Evaluación del efecto del tratamiento
+5) Conclusiones
+
+
+## Introducción
+
