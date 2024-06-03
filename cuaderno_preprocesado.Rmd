@@ -200,9 +200,15 @@ df_aux <- df_aux[,vars]
 
 filas_con_na <- rowSums(is.na(df_aux)) > 0
 
-length(filas_con_na)
+df_aux <- df_aux[!filas_con_na,]
+
 dim(df_aux)
+
 dim(df_clean)
+
+df_clean <- df_clean[!filas_con_na,]
+
+
 ```
 
 
@@ -219,8 +225,9 @@ En cuanto a la primera, variable, estudiamos su imputación. Se tiene que la pre
 Tratamos de estudiar si la varaible en cuestion en MAR
 
 ```{r}
-na_col<-is.na(df_clean$applicant_income_000s)
 
+
+na_col<-is.na(df_clean$applicant_income_000s)
 
 na_col_num <-  as.numeric(na_col)
 
@@ -348,7 +355,7 @@ validation_indices <- sort(validation_indices)
 ```
 
 
-
+Una vez particionado el conjunto, se entrena el modelo con los datos: 
 
 ```{r}
 library(randomForest)
@@ -357,10 +364,30 @@ library(randomForest)
 train <- df_clean[train_ind,]
 
 model <- randomForest(applicant_income_000s ~ ., 
-                      data = train, importance = TRUE, ntree = 100)
+                      data = train, importance = TRUE, ntree = 20)
 
 
-sum(is.na(train$applicant_income_000s))
+
+```
+
+
+Una vez entrenado se realiza la predicción del conjunto de validación para estudiar lo buenas que son las predicciones sobre datos etiquetados:
+
+```{r}
+
+```
+
+
+Además, se realiza una exploración de las variables de importancia de nuestro modelo:
+
+```{r}
+
+```
+
+
+Una vez evaluados los resultados, se realiza la imputación de los NA usando el modelo:
+
+```{r}
 
 ```
 
@@ -368,9 +395,9 @@ sum(is.na(train$applicant_income_000s))
 
 
 
+
 ```{r}
 correlation <- apply(df_clean, 2, function(x) cor(na_col, x, method = "spearman"))
-
 
 ```
 
