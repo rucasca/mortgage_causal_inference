@@ -388,6 +388,9 @@ validation_indices <- sort(validation_indices)
 Una vez particionado el conjunto, se entrena el modelo con los datos: 
 
 ```{r}
+library(randomForest)
+
+
 train <- df_clean[train_indices,]
 
 dim(train)
@@ -472,18 +475,37 @@ for (col in colnames(df)) {
 }
 
 head(df_aux)
-
+df_copia <- df
 df <- df_aux
 ```
+
+Además, guardamos el dataframe preprocesado en un csv para poder usarlo en la segunda parte del entregable, realizada en python:
+
+```{r}
+# write.csv(df, file = "datos_preprocesado.csv", row.names = FALSE)
+
+```
+
+
+
 Asimismo, se cambia el nombre de las variables tratamiento y efecto para el primer estudio:
 
 
 ```{r}
+
+
+refinanzing <- df$loan_purpose_name == "Refinancing"
+refinanzing <- as.numeric(refinanzing)
+
+not_denied <- df$action_taken_name =="Loan originated"
+not_denied <- as.numeric(denied)
+
+
 df <- subset(df, select = -c(loan_purpose_name,action_taken_name))
 
 df$D <- as.factor(refinanzing)
 
-df$y <- denied
+df$y <- not_denied
 
 head(df)
 ```
@@ -546,14 +568,6 @@ mosaicplot(matriz_confusion, main="Matriz de Confusión: Loan Purpose vs Action 
 
 
 
-Además, guardamos el dataframe preprocesado en un csv para poder usarlo en la segunda parte del entregable, realizada en python:
-
-```{r}
-write.csv(df, file = "datos_preprocesado.csv", row.names = FALSE)
-
-```
-
-
 
 En último lugar, dado que existen demasiadas instancias en el actual conjunto de datos, trabajaremos con un sobconjunto completamente aleatorio que permita obtener resultados de nuestras muestras en tiempos de computación aceptables:
 
@@ -562,10 +576,9 @@ En último lugar, dado que existen demasiadas instancias en el actual conjunto d
 ```{r}
 library(dplyr)
 
-df <- df_clean
 
 # Definir la proporción deseada
-proporcion <- 0.05
+proporcion <- 0.01
 
 print(dim(df))
 
@@ -581,6 +594,8 @@ print(dim(df))
 En primer lugar, se evalua la diferencia de medias agrupando por el tratamiento aplicado, para asi obtener el estimador sesgado por diferencia de medias:
 
 ```{r}
+head(df)
+
 library(dplyr)
 
 # Agrupar por la columna 'grupo' y calcular la media de 'valor'
@@ -592,7 +607,9 @@ medias_por_grupo <- df %>%
 print(medias_por_grupo)
 ```
 
-Este estimador sesgado revela que existen diferencias de medias entre los dos grupos, en este caso que el tratamiento produce un efecto negativo en la variable respuesta. Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.
+Este estimador sesgado revela que existen diferencias de medias entre los dos grupos, en este caso que el tratamiento produce un efecto negativo en la variable respuesta, por lo que se tiene que mediante este estimador sesgado, loan purpose = "Refinancing" aumenta la probabilidad de conceder el prestamo.
+
+Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.
 
 Además, se puede comprobar con figuras como las siguientes que el emparejamiento de variables no sigue la misma distribución: 
 
@@ -620,7 +637,7 @@ m.ps.nn.1 <- matchit(y ~ agency_name +
               applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
                   method="nearest",
                   distance="cbps",
-                  data=df_aux) 
+                  data=df) 
 
 
 m.ps.nn.1
@@ -628,6 +645,8 @@ m.ps.nn.1
 
 
 ```{r}
+
+library(cobalt)
 love.plot(m.ps.nn.1,stats = c("m","var","ks"), 
           abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
           stars = "std")
@@ -641,7 +660,7 @@ m.ps.nn.2 <- matchit(y ~ agency_name +
               applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
                   method="nearest",
                   distance="mahalanobis",
-                  data=df_aux,
+                  data=df,
             replace = TRUE) 
 
 
@@ -660,8 +679,18 @@ love.plot(m.ps.nn.2,stats = c("m","var","ks"),
 
 ## Evaluación del efecto del tratamiento
 
+En primer lugar, se evalua el efecto causal obtenido por diferencia de medias tras el primer emparejamiento:
 
+```{r}
+m.data <- match.data(m.ps.nn.1)
 
+m.data %>% 
+  group_by(D) %>% 
+  summarise(mean(y))
+```
 
+Como resultado tenemos que la probabilidad de no conceder el prestamo una vez emparejado el dataset es aun mayor en el caso de que 
+ 
+Cabe destacar que solo estamos teniendo en cuenta el efecto a nivel global, sin realizar distinciones entre posibles grupos donde los efectos sean heterogéneos. Además, 
 
 ## Conclusiones
