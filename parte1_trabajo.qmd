@@ -629,12 +629,19 @@ ggplot(df, aes(x = tract_to_msamd_income,fill = D)) +
 
 Es por ello que aplicaremos matchit como preprocesamiento y, en base a un supuesto de independencia condicional, estudiaremos el efecto causal de D sobre Y dado X, donde X son el resto de variables observadas.
 
+Se usan dos emparejamientos distintos y se comparan los resultados. En primer lugar, se hace uso de propensity score distance como métrica de distancia y como método de emparejamiento se usa el vecino más cercano, de tal forma que se puedan obtener instancias no tratadas lo mñas parecidas posibles a las tratadas.
+
 ```{r}
 library(MatchIt)
 m.ps.nn.1 <- matchit(y ~ agency_name +
             property_type_name + loan_amount_000s + 
             applicant_ethnicity_name + applicant_race_name_1 + 
-              applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population +
+              hud_median_family_income+number_of_owner_occupied_units + loan_type_name + 
+              owner_occupancy_name + preapproval_name + co_applicant_ethnicity_name +
+              co_applicant_sex_name + purchaser_type_name + 
+              lien_status_name + minority_population + tract_to_msamd_income + 
+              number_of_1_to_4_family_units,
                   method="nearest",
                   distance="cbps",
                   data=df) 
@@ -657,7 +664,12 @@ love.plot(m.ps.nn.1,stats = c("m","var","ks"),
 m.ps.nn.2 <- matchit(y ~ agency_name +
             property_type_name + loan_amount_000s + 
             applicant_ethnicity_name + applicant_race_name_1 + 
-              applicant_sex_name +applicant_income_000s +hoepa_status_name +population ,
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population +
+              hud_median_family_income+number_of_owner_occupied_units + loan_type_name + 
+              owner_occupancy_name + preapproval_name + co_applicant_ethnicity_name +
+              co_applicant_sex_name + purchaser_type_name + 
+              lien_status_name + minority_population + tract_to_msamd_income + 
+              number_of_1_to_4_family_units,
                   method="nearest",
                   distance="mahalanobis",
                   data=df,
@@ -689,8 +701,25 @@ m.data %>%
   summarise(mean(y))
 ```
 
-Como resultado tenemos que la probabilidad de no conceder el prestamo una vez emparejado el dataset es aun mayor en el caso de que 
- 
-Cabe destacar que solo estamos teniendo en cuenta el efecto a nivel global, sin realizar distinciones entre posibles grupos donde los efectos sean heterogéneos. Además, 
+Como resultado tenemos que la probabilidad de no conceder el prestamo una vez emparejado el dataset es aun menor en el caso de que su purpose = "Refinancing" que en el caso contrario. Dado que el emparejamiento en el caso 1 es bueno, ya que las distribuciones de X son parecidas en tratados y no tratados, podemos decir que a efectos globales en la muestra el efecto causal de refinanciar reduce la probabilidad de conceder el préstamo. Es importante destacar que pueden existir efectos heterogéneos que se estudiaran en el siguiente notebook donde existan diferencias en el efecto del tratamiento dado X, de distinto valor al del efecto global calculado.
 
-## Conclusiones
+
+Se evalua el efecto presente en el segundo emparejamiento:
+
+```{r}
+m.data <- match.data(m.ps.nn.2)
+
+m.data %>% 
+  group_by(D) %>% 
+  summarise(mean(y))
+```
+
+ 
+De nuevo, el efecto en este caso es negativo, aunque en este caso los emparejamientos han obtenido probabilidades bastante mayores de la concesión del credito, aunque la proporción de reducción de probabilidad al palicar el tratamiento continua siendo la misma. 
+
+Cabe destacar que solo estamos teniendo en cuenta el efecto a nivel global, sin realizar distinciones entre posibles grupos donde los efectos sean heterogéneos. 
+
+## Conclusiones del estudio mediante matching
+
+Eliminación de variables??
+
