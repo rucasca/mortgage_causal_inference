@@ -27,7 +27,9 @@ A lo largo de nuestro proyecto se estudian diversas relaciones causales de un da
 Este dataset almacena información anonima y tiene como objetivo ayudar a mostrar si los prestamistas están atendiendo las necesidades de vivienda de sus comunidades, proporcionar a los funcionarios públicos información que les ayuda a tomar decisiones y formular políticas y arrojar luz sobre los patrones de préstamos que podrían ser discriminatorios, como se indica en la pagina web donde se encuentra alojado el dataset.
 
 
-Es por ello que a lo largo de este estudio estudiaremos dos tipos de influencia, la relativa al efecto causal del  __EXPLICAR___
+Es por ello que a lo largo de este estudio estudiaremos dos tipos de influencia, la relativa al efecto causal del motivo de la solicitud del prestamo sobre la concesión del mismo, y por otro lado el efecto causal de la variable de origen étnico sobre la concesión del prestamo.
+
+Este estudio se llevará a cabo en diferentes notebooks que representan distintas aproximaciones ,siendo esta la primera parte, donde se utilizarán métodos de emparejamiento para recuperar el efecto causal.
 
 
 ## Carga del conjunto de datos
@@ -719,7 +721,25 @@ De nuevo, el efecto en este caso es negativo, aunque en este caso los emparejami
 
 Cabe destacar que solo estamos teniendo en cuenta el efecto a nivel global, sin realizar distinciones entre posibles grupos donde los efectos sean heterogéneos. 
 
+
+### Segundo estudio de la inferencia causal
+
+En segundo lugar, se repite el procedimiento con otras variables. Determinamos que sería interesante estudiar si la raza de la persona es un factor de discriminación para la concesión del préstamo, ya que como se indica en la pagina web donde se encuentra el dataset, una de sus aplicaciones era la detección de factores de discriminación. 
+
+
+En primera instancia, se 
+
 ## Conclusiones del estudio mediante matching
 
-Eliminación de variables??
+A lo largo de esta primera parte del trabajo hemos sido capaces de, a partir de datos observacionales de un conjunto de datos real,  determinar efectos globales de dos variables que actuan como tratamiento sobre la variable que indica si al individuo se le concede un prestamo. 
+
+
+Este efecto causal lo obtenemos mediante técnicas como el emparejamiento, que a partir del valor del propensity score nos permite obtener pares de muestras que mantengan distribuciones en X similares. A partir de esta selección de muestras obtenemos el efecto global, sin tener en cuenta posibles efectos heterogéneos del tratamiento.
+
+Se tiene que el efecto global de que el objetivo del prestamo sea refinanciar tiene un efecto sobre la concesión del mismo que indica que las probabilidades de ser rechazado son mayores. Cabe destacar que mediante el método aplicado no somos capaces de recuperar el intervalo de confianza necesario, algo que solucionaremos con los métodos del siguiente apartado.
+
+En cuanto a la discriminación por razas, se tiene que, de nuevo a falta de intervalos de confianza.
+
+
+En el siguiente notebook, se aplicarán procedimientos que nos permitirán averigar si existen efectos heterogeneos y nos permitirán acotar la influencia de no observables, que no es considerada mediante el método aplicado en esta primera parte.
 
