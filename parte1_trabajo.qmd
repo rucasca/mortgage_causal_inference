@@ -234,7 +234,7 @@ df_clean <- df_clean[!filas_con_na,]
 df <- df_clean
 ```
 
-Se visualizan las variables restantes:
+Se visualizan la proporción de valores faltantes en las variables restantes:
 
 ```{r}
 na_prop <- sapply(df_clean, function(x) sum(is.na(x))/dim(df_clean)[1])
@@ -257,9 +257,6 @@ na_col<-is.na(df_clean$applicant_income_000s)
 
 na_col_num <-  as.numeric(na_col)
 
-head(na_col)
-
-head(na_col_num)
 
 ```
 
@@ -356,11 +353,11 @@ ggplot(df, aes(x = as.factor(na_col_fac), y = as.factor(columna))) +
 
 
 
-Se tiene que la relación de la variable a imputar, en este caso la de la variable `applicant_income_000s` no guarda una relación evidente con alguna otra variable. Por ello, para tratar estudiar si es MAR pero existe multicolinealidad respecto a un subconjunto de variables, se implementa un modelo capaz de imputar los resultados:
+Se tiene que la relación de la variable a imputar, en este caso la de la variable `applicant_income_000s` no guarda una relación estadísticamente significativa con alguna otra variable. Por ello, para tratar estudiar si es MAR pero existe multicolinealidad respecto a un subconjunto de variables, se implementa un modelo capaz de imputar los resultados:
 
-Dado que el conjutno de datos es muy grande para entrenar el modelo (casi medio millon de instancias) se parte de un subconjunto lo suficientemente grande que permita realizar la tarea.
+Dado que el conjunto de datos es muy grande para entrenar el modelo (casi medio millon de instancias) se parte de un subconjunto lo suficientemente grande que permita realizar la tarea.
 
-En primer lugar, se fija la semilla para garantizar la reproducibilidad:
+En primer lugar, se fija la semilla para garantizar la reproducibilidad del experimento:
 
 ```{r}
 set.seed(123)
@@ -403,6 +400,8 @@ model <- randomForest(as.numeric(applicant_income_000s) ~ .,
 
 validation <- df_clean[validation_indices,]
 predictions <- predict(model, validation)
+
+
 ```
 
 Se calculan las metricas de error en validación:
@@ -427,11 +426,11 @@ El resultado de $R^2$, que indica la varianza explicada de validación por el mo
 Con esto, las posibilidades son dos:
 
 - Es Missing Completely at Random, por lo que el valor se ha perdido de forma aleatoria.
-- Es Missing Not at Random, dependiendo de no observables.
+- Es Missing Not at Random, dependiente de no observables.
 
-Ante estas dos posibilidades decidimos que lo más lógico es o bien la elimianción de las instancias que contengan en esta variable valores faltantes o bien la elimianción de la columna y pasar a tratarla como no observable.
+Ante estas dos posibilidades decidimos que lo más lógico es o bien la elimianción de las instancias que contengan en esta variable valores faltantes (lo que podría implicar la perdida de datos donde el efecto del tratamiento es distinto) o bien la elimianción de la columna y pasar a tratarla como no observable.
 
-Dado que la proporción de datos perdidos es menor a un 10%, decidimos eliminar las instancias que contienen datos faltantes, pese a poder perder posibles efectos heterogéneos si fuera Missing Not At Random y existiera influencia de la variable.
+Dado que la proporción de datos perdidos es menor a un 10%, decidimos eliminar las instancias que contienen datos faltantes, pese a poder perder posibles efectos heterogéneos si fuera Missing Not At Random y existiese influencia de la variable.
 
 ```{r}
 df <- df_clean
@@ -551,7 +550,7 @@ Lo mismo sucede con las categóricas, donde no parece haber un par donde una sea
 
 
 
-En último lugar, revisamos más afondo las relaciones entre el tratamiento y la respuesta para el primer caso, donde tratamos de 
+En último lugar, revisamos más afondo las relaciones entre el tratamiento y la respuesta para el primer caso, donde se estudia el efecto del propósito de la hipoteca (loan purpose = "Refinancing") sobre rechazo de la misma (Action taken: denied)
 
 ```{r} 
 df_clean <- df
@@ -569,10 +568,7 @@ mosaicplot(matriz_confusion, main="Matriz de Confusión: Loan Purpose vs Action 
 ```
 
 
-
-
-En último lugar, dado que existen demasiadas instancias en el actual conjunto de datos, trabajaremos con un sobconjunto completamente aleatorio que permita obtener resultados de nuestras muestras en tiempos de computación aceptables:
-
+Dado que existen demasiadas instancias en el actual conjunto de datos, trabajaremos con un sobconjunto completamente aleatorio que permita obtener resultados de nuestras muestras en tiempos de computación aceptables:
 
 
 ```{r}
@@ -580,7 +576,7 @@ library(dplyr)
 
 
 # Definir la proporción deseada
-proporcion <- 0.01
+proporcion <- 0.03
 
 print(dim(df))
 
@@ -590,6 +586,147 @@ df <- df %>% sample_frac(proporcion)
 print(dim(df))
 ```
 
+
+
+Además, se visualizan las distribuciones del resto de variables frente al tratamiento:
+En primer lugar se obtienen las distribuciones de las variables categóricas atendiendo al tratamiento aplicado:
+
+
+```{r}
+
+
+for (col in colnames(df)) {
+  if (is.numeric(df[[col]])) {
+    p <- ggplot(df, aes_string(x = col, fill = "D")) + 
+      geom_density(alpha = 0.5) 
+    print(p)
+  }
+}
+
+
+```
+
+Se tiene que en las muestras presentes, salvo pequeñas diferencias en determinadas variables como los ingresos medios familiares, las distribuciones son similares. 
+
+
+De igual manera, se representan las distribuciones de las variables categóricas en función del tratamiento:
+
+```{r}
+
+for (col in colnames(df)) {
+  if (is.factor(df[[col]])) {
+    
+    matriz_confusion <- table(df$D,df[[col]])
+
+    mosaicplot(matriz_confusion, main="Matriz de Confusión " ,
+               xlab="Loan Purpose", ylab= col, color=TRUE,
+               las=1, # Rotar etiquetas del eje y
+               cex.axis=0.8, # Tamaño de las etiquetas
+               cex.lab=0.9, # Tamaño de las etiquetas de los ejes
+               border="darkgray") # Color de las líneas de los bordes
+        
+  }
+}
+
+
+```
+
+De nuevo, salvo en variables como preapproval name, no existen diferencias considerables en ambos conjuntos.
+
+
+Por último, se genera un segundo dataframe que nos servirá para estudiar el efecto causal de ser de una raza blanca frente a no serlo, para así poder estudiar si existe discriminación en la concesión del préstamo.
+
+
+```{r}
+df2 <- df_copia
+
+
+# Definir la proporción deseada
+proporcion <- 0.035
+
+print(dim(df2))
+
+# Seleccionar aleatoriamente la proporción deseada de filas
+df2 <- df2 %>% sample_frac(proporcion)
+
+print(dim(df2))
+```
+```{r}
+
+
+raza_white <- df2$applicant_race_name_1 == "White"
+raza_white <- as.numeric(raza_white)
+
+not_denied <- df2$action_taken_name =="Loan originated"
+not_denied <- as.numeric(not_denied)
+
+
+df2 <- subset(df2, select = -c(applicant_race_name_1,action_taken_name))
+
+df2$D <- as.factor(raza_white)
+
+df2$y <- not_denied
+
+head(df2)
+
+```
+
+
+Podemos representar graficamente la matriz de confusión de tratamientvs respuesta, y en este caso se aprecia un claro desvalanceo de las clases: 
+
+```{r}
+
+matriz_confusion <- table(df2$D, df2$y)
+
+matriz_confusion
+
+mosaicplot(matriz_confusion, main="Matriz de Confusión: Race vs Action Taken",
+           xlab="Race", ylab="Action Taken", color=TRUE,
+           las=1, # Rotar etiquetas del eje y
+           cex.axis=0.8, # Tamaño de las etiquetas
+           cex.lab=0.9, # Tamaño de las etiquetas de los ejes
+           border="darkgray") # Color de las líneas de los bordes
+
+```
+
+
+De nuevo, se representan las distribuciones del resto de las clases:
+
+
+```{r}
+df_aux <-  df2
+for (col in colnames(df2)) {
+  if (is.character(df2[[col]])) {
+    df_aux[[col]] <- as.factor(df_aux[[col]])
+  }
+}
+
+df2 <- df_aux
+
+
+for (col in colnames(df2)) {
+  if (is.numeric(df2[[col]])) {
+    p <- ggplot(df2, aes_string(x = col, fill = "D")) + 
+      geom_density(alpha = 0.5) 
+    print(p)
+  }
+  else if(is.factor(df2[[col]])){
+        matriz_confusion <- table(df2$D,df2[[col]])
+
+    mosaicplot(matriz_confusion, main="Matriz de Confusión " ,
+               xlab="Loan Purpose", ylab= col, color=TRUE,
+               las=1, # Rotar etiquetas del eje y
+               cex.axis=0.8, # Tamaño de las etiquetas
+               cex.lab=0.9, # Tamaño de las etiquetas de los ejes
+               border="darkgray") # Color de las líneas de los bordes
+  }
+}
+
+
+```
+
+
+En este caso se observan que las distribuciones de cada una de las varaibles en función del tratamiento en este caso son mayores que con el tratamiento anterior,lo que supondrá un mayor reto de cara a la elección de un método de emparejamiento que obtenga muestras cuya distribución de X sea lo más parecida posible para tratados y no tratados.
 
 ## Selección de instancias mediante pareamiento
 
@@ -612,22 +749,7 @@ print(medias_por_grupo)
 Este estimador sesgado revela que existen diferencias de medias entre los dos grupos, en este caso que el tratamiento produce un efecto negativo en la variable respuesta, por lo que se tiene que mediante este estimador sesgado, loan purpose = "Refinancing" aumenta la probabilidad de conceder el prestamo.
 
 Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.
-
-Además, se puede comprobar con figuras como las siguientes que el emparejamiento de variables no sigue la misma distribución: 
-
-```{r}
-ggplot(df, aes(x = loan_amount_000s,fill = D)) + 
-          geom_density(alpha=0.5)+scale_y_continuous(limits=c(0,0.2))+
-          scale_x_continuous(limits=c(0,50))
-```
-
-En cambio para otras si que las distribuciones son similares:
-
-```{r}
-ggplot(df, aes(x = tract_to_msamd_income,fill = D)) + 
-          geom_density(alpha=0.5)
-```
-
+ 
 
 Es por ello que aplicaremos matchit como preprocesamiento y, en base a un supuesto de independencia condicional, estudiaremos el efecto causal de D sobre Y dado X, donde X son el resto de variables observadas.
 
@@ -690,6 +812,54 @@ love.plot(m.ps.nn.2,stats = c("m","var","ks"),
 ```
 
 
+Para realizar el emparejamiento para estudiar el efecto causal de la raza, se repite el procedimiento, usando los mismos métodos y métricas de distancia: 
+
+```{r}
+
+m2.ps.nn.1 <- matchit(y ~ agency_name +
+            property_type_name + loan_amount_000s + 
+            applicant_ethnicity_name + 
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population +
+              hud_median_family_income+number_of_owner_occupied_units + loan_type_name + 
+              owner_occupancy_name + preapproval_name + co_applicant_ethnicity_name +
+              co_applicant_sex_name + purchaser_type_name + 
+              lien_status_name + minority_population + tract_to_msamd_income + 
+              number_of_1_to_4_family_units,
+                  method="nearest",
+                  distance="cbps",
+                  data=df2) 
+
+
+m2.ps.nn.1
+
+love.plot(m2.ps.nn.2,stats = c("m","var","ks"), 
+          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+          stars = "std")
+```
+
+
+```{r}
+m2.ps.nn.2 <- matchit(y ~ agency_name +
+            property_type_name + loan_amount_000s + 
+            applicant_ethnicity_name+ 
+              applicant_sex_name +applicant_income_000s +hoepa_status_name +population +
+              hud_median_family_income+number_of_owner_occupied_units + loan_type_name + 
+              owner_occupancy_name + preapproval_name + co_applicant_ethnicity_name +
+              co_applicant_sex_name + purchaser_type_name + 
+              lien_status_name + minority_population + tract_to_msamd_income + 
+              number_of_1_to_4_family_units,
+                  method="nearest",
+                  distance="mahalanobis",
+                  data=df2,
+            replace = TRUE) 
+
+
+m2.ps.nn.2
+
+love.plot(m2.ps.nn.2,stats = c("m","var","ks"), 
+          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+          stars = "std")
+```
 
 ## Evaluación del efecto del tratamiento
 
@@ -724,22 +894,42 @@ Cabe destacar que solo estamos teniendo en cuenta el efecto a nivel global, sin 
 
 ### Segundo estudio de la inferencia causal
 
-En segundo lugar, se repite el procedimiento con otras variables. Determinamos que sería interesante estudiar si la raza de la persona es un factor de discriminación para la concesión del préstamo, ya que como se indica en la pagina web donde se encuentra el dataset, una de sus aplicaciones era la detección de factores de discriminación. 
+En segundo lugar, se repite el procedimiento qeu estudia si la raza de la persona es un factor de discriminación para la concesión del préstamo, ya que como se indica en la pagina web donde se encuentra el dataset, una de las aplicaciones del mismo era la detección de posibles factores de discriminación. 
+
+Para el primer emparejamiento, los resultados son los siguientes: 
+
+```{r}
+m.data <- match.data(m2.ps.nn.1)
+
+m.data %>% 
+  group_by(D) %>% 
+  summarise(mean(y))
+```
 
 
-En primera instancia, se 
+En cuanto al emparejamiento realizado usando la distancia de mahalanobis como métrica de distancia, los resultados son:
+
+```{r}
+m.data <- match.data(m2.ps.nn.2)
+
+m.data %>% 
+  group_by(D) %>% 
+  summarise(mean(y))
+```
+
+
 
 ## Conclusiones del estudio mediante matching
 
 A lo largo de esta primera parte del trabajo hemos sido capaces de, a partir de datos observacionales de un conjunto de datos real,  determinar efectos globales de dos variables que actuan como tratamiento sobre la variable que indica si al individuo se le concede un prestamo. 
 
 
-Este efecto causal lo obtenemos mediante técnicas como el emparejamiento, que a partir del valor del propensity score nos permite obtener pares de muestras que mantengan distribuciones en X similares. A partir de esta selección de muestras obtenemos el efecto global, sin tener en cuenta posibles efectos heterogéneos del tratamiento.
+Este efecto causal lo obtenemos mediante técnicas como el emparejamiento, que a partir del valor del propensity score o la distancia entre muestras nos permite obtener pares de muestras que mantengan distribuciones en X similares. A partir de esta selección de muestras obtenemos el efecto global, sin tener en cuenta posibles efectos heterogéneos del tratamiento.
 
 Se tiene que el efecto global de que el objetivo del prestamo sea refinanciar tiene un efecto sobre la concesión del mismo que indica que las probabilidades de ser rechazado son mayores. Cabe destacar que mediante el método aplicado no somos capaces de recuperar el intervalo de confianza necesario, algo que solucionaremos con los métodos del siguiente apartado.
 
-En cuanto a la discriminación por razas, se tiene que, de nuevo a falta de intervalos de confianza.
+En cuanto a la discriminación por razas, se tiene que, de nuevo a falta de intervalos de confianza, __TODO__
 
 
-En el siguiente notebook, se aplicarán procedimientos que nos permitirán averigar si existen efectos heterogeneos y nos permitirán acotar la influencia de no observables, que no es considerada mediante el método aplicado en esta primera parte.
+En el siguiente notebook, se aplicarán procedimientos que nos permitirán averigar si existen efectos heterogeneos y nos permitirán acotar la influencia de no observables, que no es considerada mediante el método aplicado en esta primera parte, además de obtener intervalos de confianza que evidencien de forma significativa si cada uno de los tratamientos tiene un efecto estadísticamente significativo, algo no calculable únicamente mediante diferencia de medias tras el emparejamiento.
 
