@@ -21,7 +21,7 @@ Fichero número 1 donde se estudia la inferencia de causal de un un tratamiento 
 ## Introducción
 
 
-A lo largo de nuestro proyecto se estudian diversas relaciones causales de un dataframe de la vida real, en nuestro caso relativo a la concesión de hipotecas, accedible mediante el siguiente (enlace)[https://www.consumerfinance.gov/data-research/hmda/]
+A lo largo de nuestro proyecto se estudian diversas relaciones causales de un dataframe de la vida real, en nuestro caso relativo a la concesión de hipotecas, accedible mediante el siguiente [enlace](https://www.consumerfinance.gov/data-research/hmda/)
 
 
 Este dataset almacena información anónima y tiene como objetivo ayudar a mostrar si los prestamistas están atendiendo las necesidades de vivienda de sus comunidades, proporcionar a los funcionarios públicos información que les ayuda a tomar decisiones y formular políticas y arrojar luz sobre los patrones de préstamos que podrían ser discriminatorios, como se indica en la pagina web donde se encuentra alojado el dataset.
@@ -775,10 +775,13 @@ m.ps.nn.1
 ```{r}
 
 library(cobalt)
-love.plot(m.ps.nn.1,stats = c("m","var","ks"), 
-          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
-          stars = "std")
+#love.plot(m.ps.nn.1,stats = c("m","var","ks"), 
+#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+#          stars = "std")
 ```
+
+
+![Resultado segundo emparejamiento](imgs/img1.png)
 
 Para un segundo emparejamiento, hacemos uso de mahalanobis para las distancias y aplicamos knn, dado que esta métrica de distancia tiene en cuenta la escala de cada variable, y en nuestro caso estas no estan normalizadas en una misma escala.
 
@@ -803,12 +806,15 @@ m.ps.nn.2
 
 
 ```{r}
-love.plot(m.ps.nn.2,stats = c("m","var","ks"), 
-          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
-          stars = "std")
+#love.plot(m.ps.nn.2,stats = c("m","var","ks"), 
+#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+#          stars = "std")
 
 ```
 
+
+
+![Resultado segundo emparejamiento](imgs/img2.png)
 
 Para realizar el emparejamiento para estudiar el efecto causal de la raza, se repite el procedimiento, usando los mismos métodos y métricas de distancia: 
 
@@ -830,10 +836,12 @@ m2.ps.nn.1 <- matchit(y ~ agency_name +
 
 m2.ps.nn.1
 
-love.plot(m2.ps.nn.1,stats = c("m","var","ks"), 
-          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
-          stars = "std")
+#love.plot(m2.ps.nn.1,stats = c("m","var","ks"), 
+#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+#          stars = "std")
 ```
+
+![Resultado primer emparejamiento](imgs/img4.png)
 
 
 ```{r, warning=FALSE, message=FALSE}
@@ -854,10 +862,14 @@ m2.ps.nn.2 <- matchit(y ~ agency_name +
 
 m2.ps.nn.2
 
-love.plot(m2.ps.nn.2,stats = c("m","var","ks"), 
-          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
-          stars = "std")
+#love.plot(m2.ps.nn.2,stats = c("m","var","ks"), 
+#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),
+#          stars = "std")
 ```
+
+
+![Resultado segundo emparejamiento](imgs/img4.png)
+
 
 El emparejamiento es decente en ambos casos, y en la gran mayoria de variables se obtienen muestras con distribuciones de X equivalentes para tanto tratados como no tratados, en cambio existen algunas variables donde (*Nota: se ha probado con diferentes métricas de distancia y métodos de emparejamiento diferentes, pero no se ha logrado solucionar este problema en este notebook, aunque en la parte dos de nuestro trabajo en python no está presente*).Este podría mejorarse haciendo uso de una mayor proporción del conjunto de datos para el emparejamiento (*De aumentarse este tamaño el tiempo de computación se dispara y no se alcanza una solución.*)
 

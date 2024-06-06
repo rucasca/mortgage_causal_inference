@@ -130,7 +130,7 @@ window.Quarto = {
 </section>
 <section id="introducción" class="level2">
 <h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
-<p>A lo largo de nuestro proyecto se estudian diversas relaciones causales de un dataframe de la vida real, en nuestro caso relativo a la concesión de hipotecas, accedible mediante el siguiente (enlace)[https://www.consumerfinance.gov/data-research/hmda/]</p>
+<p>A lo largo de nuestro proyecto se estudian diversas relaciones causales de un dataframe de la vida real, en nuestro caso relativo a la concesión de hipotecas, accedible mediante el siguiente <a href="https://www.consumerfinance.gov/data-research/hmda/">enlace</a></p>
 <p>Este dataset almacena información anónima y tiene como objetivo ayudar a mostrar si los prestamistas están atendiendo las necesidades de vivienda de sus comunidades, proporcionar a los funcionarios públicos información que les ayuda a tomar decisiones y formular políticas y arrojar luz sobre los patrones de préstamos que podrían ser discriminatorios, como se indica en la pagina web donde se encuentra alojado el dataset.</p>
 <p>Es por ello que, a lo largo de este trabajo, estudiaremos dos tipos de influencia, la relativa al efecto causal del motivo de la solicitud del prestamo sobre la concesión del mismo, y por otro lado el efecto causal de la variable raza sobre la concesión del prestamo.</p>
 <p>Este estudio se llevará a cabo en diferentes notebooks que representan distintas aproximaciones ,siendo este el primero de ellos, donde se utilizarán métodos de emparejamiento para recuperar el efecto causal.</p>
@@ -1417,16 +1417,15 @@ Adjuntando el paquete: 'cobalt'</code></pre>
 
     lalonde</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m.ps.nn<span class="fl">.1</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
-<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
-<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co">#love.plot(m.ps.nn.1,stats = c("m","var","ks"), </span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a><span class="co">#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),</span></span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="co">#          stars = "std")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="imgs/img1.png" class="img-fluid figure-img"></p>
+<figcaption>Resultado segundo emparejamiento</figcaption>
 </figure>
-</div>
-</div>
 </div>
 <p>Para un segundo emparejamiento, hacemos uso de mahalanobis para las distancias y aplicamos knn, dado que esta métrica de distancia tiene en cuenta la escala de cada variable, y en nuestro caso estas no estan normalizadas en una misma escala.</p>
 <div class="cell">
@@ -1456,16 +1455,15 @@ Adjuntando el paquete: 'cobalt'</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m.ps.nn<span class="fl">.2</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
-<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
-<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="co">#love.plot(m.ps.nn.2,stats = c("m","var","ks"), </span></span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="co">#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),</span></span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a><span class="co">#          stars = "std")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="imgs/img2.png" class="img-fluid figure-img"></p>
+<figcaption>Resultado segundo emparejamiento</figcaption>
 </figure>
-</div>
-</div>
 </div>
 <p>Para realizar el emparejamiento para estudiar el efecto causal de la raza, se repite el procedimiento, usando los mismos métodos y métricas de distancia:</p>
 <div class="cell">
@@ -1493,16 +1491,15 @@ Adjuntando el paquete: 'cobalt'</code></pre>
  - target estimand: ATT
  - covariates: agency_name, property_type_name, loan_amount_000s, applicant_ethnicity_name, applicant_sex_name, applicant_income_000s, hoepa_status_name, population, hud_median_family_income, number_of_owner_occupied_units, loan_type_name, owner_occupancy_name, preapproval_name, co_applicant_ethnicity_name, co_applicant_sex_name, purchaser_type_name, lien_status_name, minority_population, tract_to_msamd_income, number_of_1_to_4_family_units</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m2.ps.nn<span class="fl">.1</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
-<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
-<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co">#love.plot(m2.ps.nn.1,stats = c("m","var","ks"), </span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a><span class="co">#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),</span></span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a><span class="co">#          stars = "std")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="imgs/img4.png" class="img-fluid figure-img"></p>
+<figcaption>Resultado primer emparejamiento</figcaption>
 </figure>
-</div>
-</div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>m2.ps.nn<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">matchit</span>(y <span class="sc">~</span> agency_name <span class="sc">+</span></span>
@@ -1529,16 +1526,15 @@ Adjuntando el paquete: 'cobalt'</code></pre>
  - target estimand: ATT
  - covariates: agency_name, property_type_name, loan_amount_000s, applicant_ethnicity_name, applicant_sex_name, applicant_income_000s, hoepa_status_name, population, hud_median_family_income, number_of_owner_occupied_units, loan_type_name, owner_occupancy_name, preapproval_name, co_applicant_ethnicity_name, co_applicant_sex_name, purchaser_type_name, lien_status_name, minority_population, tract_to_msamd_income, number_of_1_to_4_family_units</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m2.ps.nn<span class="fl">.2</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
-<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
-<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="co">#love.plot(m2.ps.nn.2,stats = c("m","var","ks"), </span></span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="co">#          abs = TRUE,thresholds=c(m=0.1,ks=0.05,var=2),</span></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="co">#          stars = "std")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="imgs/img4.png" class="img-fluid figure-img"></p>
+<figcaption>Resultado segundo emparejamiento</figcaption>
 </figure>
-</div>
-</div>
 </div>
 <p>El emparejamiento es decente en ambos casos, y en la gran mayoria de variables se obtienen muestras con distribuciones de X equivalentes para tanto tratados como no tratados, en cambio existen algunas variables donde (<em>Nota: se ha probado con diferentes métricas de distancia y métodos de emparejamiento diferentes, pero no se ha logrado solucionar este problema en este notebook, aunque en la parte dos de nuestro trabajo en python no está presente</em>).Este podría mejorarse haciendo uso de una mayor proporción del conjunto de datos para el emparejamiento (<em>De aumentarse este tamaño el tiempo de computación se dispara y no se alcanza una solución.</em>)</p>
 </section>
