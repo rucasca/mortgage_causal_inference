@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>parte1_trabajo</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="parte1_trabajo_files/libs/clipboard/clipboard.min.js"></script>
+<script src="parte1_trabajo_files/libs/quarto-html/quarto.js"></script>
+<script src="parte1_trabajo_files/libs/quarto-html/popper.min.js"></script>
+<script src="parte1_trabajo_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="parte1_trabajo_files/libs/quarto-html/anchor.min.js"></script>
+<link href="parte1_trabajo_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="parte1_trabajo_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="parte1_trabajo_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="parte1_trabajo_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="parte1_trabajo_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="trabajo-grupo-tiburonesml" class="level1">
+<h1>TRABAJO GRUPO tiburonesML</h1>
+<p>Fichero número 1 donde se estudia la inferencia de causal de un un tratamiento en una variable mediante métodos de pareamiento. Los integrantes del proyecto son los siguientes:</p>
+<ul>
+<li>Manuel Rubio Martínez</li>
+<li>Carlos Sanchez Polo</li>
+<li>Ruben Castillo Carrasco</li>
+</ul>
+<section id="indice" class="level2">
+<h2 class="anchored" data-anchor-id="indice">Indice</h2>
+<ol type="1">
+<li>Introducción</li>
+<li>Carga del conjunto de datos</li>
+<li>AED y preprocesamiento de los datos</li>
+<li>Selección de instancias mediante pareamiento</li>
+<li>Evaluación del efecto del tratamiento</li>
+<li>Conclusiones</li>
+</ol>
+</section>
+<section id="introducción" class="level2">
+<h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
+<p>A lo largo de nuestro proyecto se estudian diversas relaciones causales de un dataframe de la vida real, en nuestro caso relativo a la concesión de hipotecas, accedible mediante el siguiente (enlace)[https://www.consumerfinance.gov/data-research/hmda/]</p>
+<p>Este dataset almacena información anónima y tiene como objetivo ayudar a mostrar si los prestamistas están atendiendo las necesidades de vivienda de sus comunidades, proporcionar a los funcionarios públicos información que les ayuda a tomar decisiones y formular políticas y arrojar luz sobre los patrones de préstamos que podrían ser discriminatorios, como se indica en la pagina web donde se encuentra alojado el dataset.</p>
+<p>Es por ello que, a lo largo de este trabajo, estudiaremos dos tipos de influencia, la relativa al efecto causal del motivo de la solicitud del prestamo sobre la concesión del mismo, y por otro lado el efecto causal de la variable raza sobre la concesión del prestamo.</p>
+<p>Este estudio se llevará a cabo en diferentes notebooks que representan distintas aproximaciones ,siendo este el primero de ellos, donde se utilizarán métodos de emparejamiento para recuperar el efecto causal.</p>
+</section>
+<section id="carga-del-conjunto-de-datos" class="level2">
+<h2 class="anchored" data-anchor-id="carga-del-conjunto-de-datos">Carga del conjunto de datos</h2>
+<p>Se carga el conjunto de datos, en nuestro caso decidimos usar el conjunto de datos de Washington del año más reciente posible, en este caso del 2017.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Adjuntando el paquete: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(graphics)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"hmda_2017_wa_all-records_labels.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Realizamos una primera visualización para estudiar si se han cargado correctamente los valores:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 78
+  as_of_year respondent_id agency_name    agency_abbr agency_code loan_type_name
+       &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;         
+1       2017 77-0605392    Department of… HUD                   7 Conventional  
+2       2017 0000504713    Consumer Fina… CFPB                  9 Conventional  
+3       2017 13-6131491    Department of… HUD                   7 Conventional  
+4       2017 0471809999    Department of… HUD                   7 FHA-insured   
+5       2017 26-1334020    Department of… HUD                   7 Conventional  
+6       2017 46-3435079    Department of… HUD                   7 VA-guaranteed 
+# ℹ 72 more variables: loan_type &lt;dbl&gt;, property_type_name &lt;chr&gt;,
+#   property_type &lt;dbl&gt;, loan_purpose_name &lt;chr&gt;, loan_purpose &lt;dbl&gt;,
+#   owner_occupancy_name &lt;chr&gt;, owner_occupancy &lt;dbl&gt;, loan_amount_000s &lt;dbl&gt;,
+#   preapproval_name &lt;chr&gt;, preapproval &lt;dbl&gt;, action_taken_name &lt;chr&gt;,
+#   action_taken &lt;dbl&gt;, msamd_name &lt;chr&gt;, msamd &lt;dbl&gt;, state_name &lt;chr&gt;,
+#   state_abbr &lt;chr&gt;, state_code &lt;dbl&gt;, county_name &lt;chr&gt;, county_code &lt;dbl&gt;,
+#   census_tract_number &lt;chr&gt;, applicant_ethnicity_name &lt;chr&gt;, …</code></pre>
+</div>
+</div>
+</section>
+<section id="aed-y-preprocesamiento-de-los-datos" class="level2">
+<h2 class="anchored" data-anchor-id="aed-y-preprocesamiento-de-los-datos">AED y preprocesamiento de los datos</h2>
+<p>Una vez cargado, realizamos un estudio rápido de los datos:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>resultados <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">colnames</span>(df)) {</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  frecuencias <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(df[[col]]))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  frecuencias <span class="ot">&lt;-</span> frecuencias <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(Freq))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  top_10 <span class="ot">&lt;-</span> <span class="fu">head</span>(frecuencias, <span class="dv">10</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  resultados[[col]] <span class="ot">&lt;-</span> top_10</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Se muestran solo las 5 primeras, aunque nosotros de forma manual visualizamos una por una</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(resultados)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$as_of_year
+  Var1   Freq
+1 2017 402196
+
+$respondent_id
+         Var1  Freq
+1  0000451965 27927
+2  0000032489 16867
+3  13-6131491 15697
+4  7197000003 15035
+5  0471809999 13102
+6  0000852218 12424
+7  0000972590 10322
+8  0000504713 10152
+9  76-0503625  8479
+10 91-1374387  8354
+
+$agency_name
+                                         Var1   Freq
+1 Department of Housing and Urban Development 213936
+2        Consumer Financial Protection Bureau 116182
+3       Federal Deposit Insurance Corporation  38090
+4        National Credit Union Administration  27641
+5   Office of the Comptroller of the Currency   3700
+6                      Federal Reserve System   2647
+
+$agency_abbr
+  Var1   Freq
+1  HUD 213936
+2 CFPB 116182
+3 FDIC  38090
+4 NCUA  27641
+5  OCC   3700
+6  FRS   2647
+
+$agency_code
+  Var1   Freq
+1    7 213936
+2    9 116182
+3    3  38090
+4    5  27641
+5    1   3700
+6    2   2647
+
+$loan_type_name
+                Var1   Freq
+1       Conventional 290648
+2        FHA-insured  56029
+3      VA-guaranteed  51256
+4 FSA/RHS-guaranteed   4263</code></pre>
+</div>
+</div>
+<p>Se tiene que una gran cantidad de las columnas son redundantes, ya que existen columnas de codigos y categóricas que tienen el mismo significado. Esto posteriormente lo solucionaremos eliminando las columnas redundantes.</p>
+<p>En cuanto al tamaño del dataframe se tiene que este es:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 402196     78</code></pre>
+</div>
+</div>
+<p>Se tiene que hay muchas instancias en el conjunto de datos, algo que puede ser un problema para métodos de matching que usen knn, con un orden de complejidad de <span class="math inline">\(O(n^2)\)</span>.</p>
+<p>Tras esto, eliminamos las columnas redundantes y nos quedamos con las siguientes:</p>
+<ul>
+<li>agency_name</li>
+<li>loan_type_name</li>
+<li>property_type_name</li>
+<li>loan_purpose_name</li>
+<li>owner_occupancy_name</li>
+<li>loan_amount_000s</li>
+<li>preapproval_name</li>
+<li>msamd_name</li>
+<li>applicant_ethnicity_name</li>
+<li>co_applicant_ethnicity_name</li>
+<li>applicant_race_name_1</li>
+<li>applicant_race_name_2</li>
+<li>co_applicant_race_name_1</li>
+<li>applicant_sex_name</li>
+<li>co_applicant_sex_name: una de nuestras variables tratamiento</li>
+<li>applicant_income_000s</li>
+<li>purchaser_type_name</li>
+<li>rate_spread</li>
+<li>hoepa_status_name</li>
+<li>lien_status_name</li>
+<li>population</li>
+<li>minority_population</li>
+<li>hud_median_family_income</li>
+<li>tract_to_msamd_income: indica la riqueza de la zona</li>
+<li>tract_to_msamd_income</li>
+<li>number_of_owner_occupied_units</li>
+<li>number_of_1_to_4_family_units</li>
+<li>action_taken_name: una de nuestras variables respuesta</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>columnas <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"agency_name"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"loan_type_name"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"property_type_name"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"loan_purpose_name"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"owner_occupancy_name"</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"loan_amount_000s"</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"preapproval_name"</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"msamd_name"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"applicant_ethnicity_name"</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"co_applicant_ethnicity_name"</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"applicant_race_name_1"</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"applicant_race_name_2"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"co_applicant_race_name_1"</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"applicant_sex_name"</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"co_applicant_sex_name"</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"applicant_income_000s"</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"purchaser_type_name"</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rate_spread"</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"hoepa_status_name"</span>,</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lien_status_name"</span>,</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"population"</span>,</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"minority_population"</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"hud_median_family_income"</span>,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tract_to_msamd_income"</span>,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"number_of_owner_occupied_units"</span>,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"number_of_1_to_4_family_units"</span>,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">'action_taken_name'</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>df_clean <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(columnas)</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df_clean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Tras esto, exploramos la distribución de valores faltantes NA en el conjunto de datos. Antes de esto, cabe destacar la clasificación de valores faltantes de acuerdo a su origen, donde se tienen los siguientes tipos:</p>
+<ol type="1">
+<li><p>Missing Completely at Random (MCAR): los datos faltantes son independientes tanto de las variables observadas como de las no observadas</p></li>
+<li><p>Missing at Random (MAR): los datos faltantes dependen de variables observadas pero no de las no observadas.</p></li>
+<li><p>Missing Not at Random (MNAR): los datos faltantes dependen de las propias variables no observadas.</p></li>
+</ol>
+<p>Tratamos de estudiar si la varaible en cuestion en MAR</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> <span class="fu">sapply</span>(df_clean, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x))<span class="sc">/</span><span class="fu">dim</span>(df_clean)[<span class="dv">1</span>])</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(na_prop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   agency_name                 loan_type_name 
+                   0.000000000                    0.000000000 
+            property_type_name              loan_purpose_name 
+                   0.000000000                    0.000000000 
+          owner_occupancy_name               loan_amount_000s 
+                   0.000000000                    0.000000000 
+              preapproval_name                     msamd_name 
+                   0.000000000                    0.090823877 
+      applicant_ethnicity_name    co_applicant_ethnicity_name 
+                   0.000000000                    0.000000000 
+         applicant_race_name_1          applicant_race_name_2 
+                   0.000000000                    0.989157028 
+      co_applicant_race_name_1             applicant_sex_name 
+                   0.000000000                    0.000000000 
+         co_applicant_sex_name          applicant_income_000s 
+                   0.000000000                    0.095299307 
+           purchaser_type_name                    rate_spread 
+                   0.000000000                    0.974378164 
+             hoepa_status_name               lien_status_name 
+                   0.000000000                    0.000000000 
+                    population            minority_population 
+                   0.001061671                    0.001061671 
+      hud_median_family_income          tract_to_msamd_income 
+                   0.001061671                    0.001061671 
+number_of_owner_occupied_units  number_of_1_to_4_family_units 
+                   0.001061671                    0.001061671 
+             action_taken_name 
+                   0.000000000 </code></pre>
+</div>
+</div>
+<p>La gran mayoria se tiene que no poseen valores faltantes, si se filtra por si poseen valores faltantes se obtiene:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> <span class="fu">sapply</span>(df_clean, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x))<span class="sc">/</span><span class="fu">dim</span>(df_clean)[<span class="dv">1</span>])</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> na_prop[na_prop<span class="sc">!=</span><span class="dv">0</span>]</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(na_prop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    msamd_name          applicant_race_name_2 
+                   0.090823877                    0.989157028 
+         applicant_income_000s                    rate_spread 
+                   0.095299307                    0.974378164 
+                    population            minority_population 
+                   0.001061671                    0.001061671 
+      hud_median_family_income          tract_to_msamd_income 
+                   0.001061671                    0.001061671 
+number_of_owner_occupied_units  number_of_1_to_4_family_units 
+                   0.001061671                    0.001061671 </code></pre>
+</div>
+</div>
+<p>De entre las variables con NAs, se decide eliminar aquellas que tienen una proporción de NAs muy alta, por encima del 90%, independientemente del tipo de valor faltante presente.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_clean <span class="ot">&lt;-</span> df_clean[, <span class="sc">!</span><span class="fu">names</span>(df_clean) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"msamd_name"</span>,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">"rate_spread"</span>, <span class="st">"applicant_race_name_2"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Con esto, se obtiene:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> <span class="fu">sapply</span>(df_clean, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x))<span class="sc">/</span><span class="fu">dim</span>(df_clean)[<span class="dv">1</span>])</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> na_prop[na_prop<span class="sc">!=</span><span class="dv">0</span>]</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(na_prop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         applicant_income_000s                     population 
+                   0.095299307                    0.001061671 
+           minority_population       hud_median_family_income 
+                   0.001061671                    0.001061671 
+         tract_to_msamd_income number_of_owner_occupied_units 
+                   0.001061671                    0.001061671 
+ number_of_1_to_4_family_units 
+                   0.001061671 </code></pre>
+</div>
+</div>
+<p>Para la imputación de valores de columnas donde la presencia de NAs es menor al 0.2%, simplemente eliminamos las instancias que los contienen ya que la perdida de datos es mínima.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">c</span> (<span class="st">"minority_population"</span> ,<span class="st">"tract_to_msamd_income"</span>,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>           <span class="st">"number_of_1_to_4_family_units"</span>,<span class="st">"population"</span>,<span class="st">"hud_median_family_income"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">"number_of_owner_occupied_units"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>df_aux <span class="ot">&lt;-</span> df_clean</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>df_aux <span class="ot">&lt;-</span> df_aux[,vars]</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>filas_con_na <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">is.na</span>(df_aux)) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>df_aux <span class="ot">&lt;-</span> df_aux[<span class="sc">!</span>filas_con_na,]</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>df_clean <span class="ot">&lt;-</span> df_clean[<span class="sc">!</span>filas_con_na,]</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df_clean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Se visualizan la proporción de valores faltantes en las variables restantes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> <span class="fu">sapply</span>(df_clean, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x))<span class="sc">/</span><span class="fu">dim</span>(df_clean)[<span class="dv">1</span>])</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>na_prop <span class="ot">&lt;-</span> na_prop[na_prop<span class="sc">!=</span><span class="dv">0</span>]</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(na_prop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>applicant_income_000s 
+           0.09525125 </code></pre>
+</div>
+</div>
+<p>Se tiene que <code>applicant_income_000s</code> tiene un 10% aproximadamente de valores faltantes. Es por ello por lo que tratamos de identificar el tipo de NA presente. De tratarse de una variable Missing at Random, esta estaría relacionada con algunas de las otras variables presentes, y podría imputarse su valor mediante métodos de ML.</p>
+<p>Es por ello que primeramente tratamos de estudiar la relación mediante estadisticos para comparar de forma individual respecto a cada una de las variables del dataframe:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>na_col<span class="ot">&lt;-</span><span class="fu">is.na</span>(df_clean<span class="sc">$</span>applicant_income_000s)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>na_col_num <span class="ot">&lt;-</span>  <span class="fu">as.numeric</span>(na_col)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>asociaciones_num <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>asociaciones_cat <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>j <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">colnames</span>(df_clean)){</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  columna <span class="ot">&lt;-</span> df_clean[[i]]</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">is.numeric</span>(columna) <span class="sc">&amp;&amp;</span> i<span class="sc">!=</span><span class="st">"applicant_income_000s"</span>){</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    na_col_num<span class="ot">&lt;-</span><span class="fu">as.numeric</span>(na_col)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    elems <span class="ot">&lt;-</span> <span class="fu">is.na</span>(columna)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    na_col_num<span class="ot">&lt;-</span>na_col_num[<span class="sc">!</span>elems]</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    columna <span class="ot">&lt;-</span> columna[<span class="sc">!</span>elems]</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    asociaciones_num  <span class="ot">&lt;-</span> <span class="fu">c</span>(asociaciones_num,<span class="fu">cor</span>(na_col_num, </span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>                                                columna, <span class="at">method =</span> <span class="st">"spearman"</span>))</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(asociaciones_num)[j] <span class="ot">&lt;-</span> i</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    j<span class="ot">&lt;-</span> j<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(i<span class="sc">!=</span><span class="st">"applicant_income_000s"</span>){</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>    na_col_fac <span class="ot">&lt;-</span>  <span class="fu">as.factor</span>(na_col)</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    elems <span class="ot">&lt;-</span> <span class="fu">is.na</span>(columna)</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    na_col_fac<span class="ot">&lt;-</span>na_col_fac[<span class="sc">!</span>elems]</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    columna <span class="ot">&lt;-</span> columna[<span class="sc">!</span>elems]</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>    columna <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(columna)</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>    contingency_table <span class="ot">&lt;-</span> <span class="fu">table</span>(na_col_fac, columna)</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(contingency_table)</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>    asociaciones_cat  <span class="ot">&lt;-</span> <span class="fu">c</span>(asociaciones_cat,result<span class="sc">$</span>p.value)</span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(asociaciones_cat)[k] <span class="ot">&lt;-</span> i</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>En primer lugar se observan los resultados del test respecto a las variables numéricas, donde se ha usado la correlación de spearman:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(asociaciones_num)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              loan_amount_000s                     population 
+                 -0.0008458731                  -0.0010205334 
+           minority_population       hud_median_family_income 
+                  0.0005491727                  -0.0371991222 
+         tract_to_msamd_income number_of_owner_occupied_units 
+                 -0.0295282126                  -0.0114453985 
+ number_of_1_to_4_family_units 
+                  0.0016203129 </code></pre>
+</div>
+</div>
+<p>Se repite el procedimeinto usando el chi squared para las categóricas:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(asociaciones_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                agency_name              loan_type_name 
+                 0.00000000                  0.00000000 
+         property_type_name           loan_purpose_name 
+                 0.00000000                  0.00000000 
+       owner_occupancy_name            preapproval_name 
+                 0.00000000                  0.00000000 
+   applicant_ethnicity_name co_applicant_ethnicity_name 
+                 0.00000000                  0.00000000 
+      applicant_race_name_1    co_applicant_race_name_1 
+                 0.00000000                  0.00000000 
+         applicant_sex_name       co_applicant_sex_name 
+                 0.00000000                  0.00000000 
+        purchaser_type_name           hoepa_status_name 
+                 0.00000000                  0.01068911 
+           lien_status_name           action_taken_name 
+                 0.00000000                  0.00000000 </code></pre>
+</div>
+</div>
+<p>Se representa graficamente un diagrama de mosaico con la variable con la que guarde más relación:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>row_sums <span class="ot">&lt;-</span> <span class="fu">apply</span>(contingency_table, <span class="dv">1</span>, sum)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>normalized_table <span class="ot">&lt;-</span> contingency_table <span class="sc">/</span> row_sums</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">as.table</span>(normalized_table))</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(na_col_fac), <span class="at">y =</span> <span class="fu">as.factor</span>(columna))) <span class="sc">+</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">fill =</span> Freq), <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">high =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">round</span>(Freq, <span class="dv">2</span>)), <span class="at">vjust =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Contingency Table Plot"</span>,</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"applicant_income_000s"</span>,</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"number_of_1_to_4_family_units"</span>,</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Frecuencias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Se tiene que la relación de la variable a imputar, en este caso la de la variable <code>applicant_income_000s</code> no guarda una relación estadísticamente significativa con alguna otra variable. Por ello, para tratar estudiar si es MAR pero existe multicolinealidad respecto a un subconjunto de variables, se implementa un modelo capaz de imputar los resultados:</p>
+<p>Dado que el conjunto de datos es muy grande para entrenar el modelo (casi medio millon de instancias) se parte de un subconjunto lo suficientemente grande que permita realizar la tarea, obtenido muestreando el conjunto de datos de forma aleatoria, por lo que el conjunto de datos será igualmente valido.</p>
+<p>En primer lugar, se fija la semilla para garantizar la reproducibilidad del experimento:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Se particiona en train test y validación, siendo train y validación conjuntos donde los valores de <code>applicant_income_000s</code> estan presentes y el conjunto de test el conjunto donde estos no lo estan:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>test_ind <span class="ot">&lt;-</span> <span class="fu">is.na</span>(df_clean<span class="sc">$</span>applicant_income_000s)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>train_ind <span class="ot">&lt;-</span> <span class="sc">!</span>test_ind</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>test_ind <span class="ot">&lt;-</span><span class="fu">which</span>(test_ind)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>train_ind <span class="ot">&lt;-</span> <span class="fu">which</span>(train_ind)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>train_size <span class="ot">&lt;-</span> <span class="fu">floor</span>(<span class="fl">0.1</span> <span class="sc">*</span> <span class="fu">length</span>(train_ind))</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(train_ind, <span class="at">size =</span> train_size)</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>validation_indices <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(train_ind, train_indices)</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>train_indices <span class="ot">&lt;-</span> <span class="fu">sort</span>(train_indices)</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>validation_indices <span class="ot">&lt;-</span> <span class="fu">sort</span>(validation_indices)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Una vez particionado el conjunto, se entrena el modelo con los datos:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>randomForest 4.7-1.1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Type rfNews() to see new features/changes/bug fixes.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Adjuntando el paquete: 'randomForest'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ggplot2':
+
+    margin</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    combine</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> df_clean[train_indices,]</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 36350    24</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(<span class="fu">as.numeric</span>(applicant_income_000s) <span class="sc">~</span> ., </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> train, <span class="at">importance =</span> <span class="cn">TRUE</span>, <span class="at">ntree =</span> <span class="dv">10</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>validation <span class="ot">&lt;-</span> df_clean[validation_indices,]</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, validation)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Se calculan las metricas de error en validación:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>actuals <span class="ot">&lt;-</span> validation<span class="sc">$</span>applicant_income_000s</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">&lt;-</span> <span class="fu">mean</span>((predictions <span class="sc">-</span> actuals)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"MSE:"</span>, mse))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "MSE: 12409.0542674406"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>ss_res <span class="ot">&lt;-</span> <span class="fu">sum</span>((actuals <span class="sc">-</span> predictions)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>ss_tot <span class="ot">&lt;-</span> <span class="fu">sum</span>((actuals <span class="sc">-</span> <span class="fu">mean</span>(actuals))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>r_squared <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (ss_res <span class="sc">/</span> ss_tot)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"R²:"</span>, r_squared))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "R²: 0.24096865730938"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Cargando paquete requerido: lattice</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">postResample</span>(predictions, actuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       RMSE    Rsquared         MAE 
+111.3959347   0.2515034  43.2522689 </code></pre>
+</div>
+</div>
+<p>El resultado de <span class="math inline">\(R^2\)</span>, que indica la varianza explicada de validación por el modelo, es insificiente para poder considerar una relación de nuestra valiable a imputar con el resto de las observables en el modelo. Es por ello por lo que podemos considerar que esta variable no es MAR.</p>
+<p>Con esto, las posibilidades son dos:</p>
+<ul>
+<li>Es Missing Completely at Random, por lo que el valor se ha perdido de forma aleatoria.</li>
+<li>Es Missing Not at Random, dependiente de no observables.</li>
+</ul>
+<p>Ante estas dos posibilidades decidimos que lo más lógico es o bien la elimianción de las instancias que contengan en esta variable valores faltantes (lo que podría implicar la perdida de datos donde el efecto del tratamiento sea distinto) o bien la elimianción de la columna y pasar a tratarla como no observable.</p>
+<p>Dado que la proporción de datos perdidos es menor a un 10%, decidimos eliminar las instancias que contienen datos faltantes, pese a poder perder posibles efectos heterogéneos si fuera Missing Not At Random y existiese influencia de la variable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df_clean</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(df)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>df_clean <span class="ot">&lt;-</span> df</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>A continuación, realizamos un breve análisis exploratorio de los datos para eliminar posibles columnas redundantes no detectadas anteriormente.</p>
+<p>Por ello, aplicamos a los pares de columnas test estadísticos que nos aporten información de las relaciones par a par entre atributos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape2)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Suponiendo que tu dataframe se llama 'df'</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcula la matriz de correlación</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(df[,<span class="fu">sapply</span>(df, is.numeric)], <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Convierte la matriz de correlación en un formato largo para ggplot2</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>cor_data <span class="ot">&lt;-</span> <span class="fu">melt</span>(cor_matrix)</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(cor_matrix, <span class="at">method =</span> <span class="st">"color"</span>, <span class="at">type =</span> <span class="st">"upper"</span>, </span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">tl.col =</span> <span class="st">"black"</span>, <span class="at">tl.srt =</span> <span class="dv">45</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Antes de aplicar el estadistico en las categóricas, se realiza un casting a factor:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>df_aux <span class="ot">&lt;-</span>  df</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">colnames</span>(df)) {</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.character</span>(df[[col]])) {</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    df_aux[[col]] <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(df_aux[[col]])</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df_aux)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 24
+  agency_name                loan_type_name property_type_name loan_purpose_name
+  &lt;fct&gt;                      &lt;fct&gt;          &lt;fct&gt;              &lt;fct&gt;            
+1 Department of Housing and… Conventional   Manufactured hous… Refinancing      
+2 Consumer Financial Protec… Conventional   One-to-four famil… Refinancing      
+3 Department of Housing and… Conventional   One-to-four famil… Refinancing      
+4 Department of Housing and… FHA-insured    One-to-four famil… Home purchase    
+5 Department of Housing and… FHA-insured    One-to-four famil… Home purchase    
+6 Consumer Financial Protec… Conventional   One-to-four famil… Home purchase    
+# ℹ 20 more variables: owner_occupancy_name &lt;fct&gt;, loan_amount_000s &lt;dbl&gt;,
+#   preapproval_name &lt;fct&gt;, applicant_ethnicity_name &lt;fct&gt;,
+#   co_applicant_ethnicity_name &lt;fct&gt;, applicant_race_name_1 &lt;fct&gt;,
+#   co_applicant_race_name_1 &lt;fct&gt;, applicant_sex_name &lt;fct&gt;,
+#   co_applicant_sex_name &lt;fct&gt;, applicant_income_000s &lt;dbl&gt;,
+#   purchaser_type_name &lt;fct&gt;, hoepa_status_name &lt;fct&gt;, lien_status_name &lt;fct&gt;,
+#   population &lt;dbl&gt;, minority_population &lt;dbl&gt;, …</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>df_copia <span class="ot">&lt;-</span> df</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df_aux</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Además, guardamos el dataframe preprocesado en un csv para poder usarlo en la segunda parte del entregable, realizada en python:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write.csv(df, file = "datos_preprocesado.csv", row.names = FALSE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Asimismo, se cambia el nombre de las variables tratamiento y efecto para el primer estudio:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>refinanzing <span class="ot">&lt;-</span> df<span class="sc">$</span>loan_purpose_name <span class="sc">==</span> <span class="st">"Refinancing"</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>refinanzing <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(refinanzing)</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>not_denied <span class="ot">&lt;-</span> df<span class="sc">$</span>action_taken_name <span class="sc">==</span><span class="st">"Loan originated"</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>not_denied <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(not_denied)</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(loan_purpose_name,action_taken_name))</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>D <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(refinanzing)</span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>y <span class="ot">&lt;-</span> not_denied</span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 24
+  agency_name             loan_type_name property_type_name owner_occupancy_name
+  &lt;fct&gt;                   &lt;fct&gt;          &lt;fct&gt;              &lt;fct&gt;               
+1 Department of Housing … Conventional   Manufactured hous… Owner-occupied as a…
+2 Consumer Financial Pro… Conventional   One-to-four famil… Owner-occupied as a…
+3 Department of Housing … Conventional   One-to-four famil… Owner-occupied as a…
+4 Department of Housing … FHA-insured    One-to-four famil… Owner-occupied as a…
+5 Department of Housing … FHA-insured    One-to-four famil… Owner-occupied as a…
+6 Consumer Financial Pro… Conventional   One-to-four famil… Owner-occupied as a…
+# ℹ 20 more variables: loan_amount_000s &lt;dbl&gt;, preapproval_name &lt;fct&gt;,
+#   applicant_ethnicity_name &lt;fct&gt;, co_applicant_ethnicity_name &lt;fct&gt;,
+#   applicant_race_name_1 &lt;fct&gt;, co_applicant_race_name_1 &lt;fct&gt;,
+#   applicant_sex_name &lt;fct&gt;, co_applicant_sex_name &lt;fct&gt;,
+#   applicant_income_000s &lt;dbl&gt;, purchaser_type_name &lt;fct&gt;,
+#   hoepa_status_name &lt;fct&gt;, lien_status_name &lt;fct&gt;, population &lt;dbl&gt;,
+#   minority_population &lt;dbl&gt;, hud_median_family_income &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<p>Respecto a las numéricas, no parece haber un par de variables cuya relación sea clara y pueda eliminarse una de ellas.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>cramers_v <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  tbl <span class="ot">&lt;-</span> <span class="fu">table</span>(x, y)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  chi2 <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(tbl)<span class="sc">$</span>statistic</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">sum</span>(tbl)</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  min_dim <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">nrow</span>(tbl) <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">ncol</span>(tbl) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">sqrt</span>(chi2 <span class="sc">/</span> (n <span class="sc">*</span> min_dim)))</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">colnames</span>(df)[<span class="fu">sapply</span>(df, <span class="cf">function</span>(x) <span class="fu">class</span>(x) <span class="sc">==</span> <span class="st">"factor"</span>)])</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>cramers_v_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, n, n)</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(cramers_v_matrix) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(df)[<span class="fu">sapply</span>(df, <span class="cf">function</span>(x) <span class="fu">class</span>(x) <span class="sc">==</span> <span class="st">"factor"</span>)]</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cramers_v_matrix) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(df)[<span class="fu">sapply</span>(df, <span class="cf">function</span>(x) <span class="fu">class</span>(x) <span class="sc">==</span> <span class="st">"factor"</span>)]</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="sc">!=</span> j) {</span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>      cramers_v_matrix[i, j] <span class="ot">&lt;-</span> <span class="fu">cramers_v</span>(df[[i]], df[[j]])</span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>cramers_v_data <span class="ot">&lt;-</span> <span class="fu">melt</span>(cramers_v_matrix)</span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> cramers_v_data, <span class="fu">aes</span>(Var1, Var2, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">high =</span> <span class="st">"red"</span>, <span class="at">mid =</span> <span class="st">"white"</span>,</span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a>                       <span class="at">midpoint =</span> <span class="fl">0.5</span>, <span class="at">limit =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">space =</span> <span class="st">"Lab"</span>,</span>
+<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a>                       <span class="at">name=</span><span class="st">"Cramér's V"</span>) <span class="sc">+</span></span>
+<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">vjust =</span> <span class="dv">1</span>,</span>
+<span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">size =</span> <span class="dv">12</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Lo mismo sucede con las categóricas, donde no parece haber un par donde una sea redundante, por lo que dejamos el dataframe como esta, ya que las variables donde el resultado es cercano al 0.5 no guardan una relación clara.</p>
+<p>En último lugar, revisamos más afondo las relaciones entre el tratamiento y la respuesta para el primer caso, donde se estudia el efecto del propósito de la hipoteca (loan purpose = “Refinancing”) sobre rechazo de la misma (Action taken: denied)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>df_clean <span class="ot">&lt;-</span> df</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>matriz_confusion <span class="ot">&lt;-</span> <span class="fu">table</span>(df_clean<span class="sc">$</span>D, df_clean<span class="sc">$</span>y)</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>matriz_confusion</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+         0      1
+  0  69039 139370
+  1  74088  81003</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mosaicplot</span>(matriz_confusion, <span class="at">main=</span><span class="st">"Matriz de Confusión: Loan Purpose vs Action Taken"</span>,</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab=</span><span class="st">"Loan Purpose"</span>, <span class="at">ylab=</span><span class="st">"Action Taken"</span>, <span class="at">color=</span><span class="cn">TRUE</span>,</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">las=</span><span class="dv">1</span>, <span class="co"># Rotar etiquetas del eje y</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">cex.axis=</span><span class="fl">0.8</span>, <span class="co"># Tamaño de las etiquetas</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">cex.lab=</span><span class="fl">0.9</span>, <span class="co"># Tamaño de las etiquetas de los ejes</span></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">border=</span><span class="st">"darkgray"</span>) <span class="co"># Color de las líneas de los bordes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Dado que existen demasiadas instancias en el actual conjunto de datos, trabajaremos con un sobconjunto completamente aleatorio que permita obtener resultados de nuestras muestras en tiempos de computación aceptables:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>proporcion <span class="ot">&lt;-</span> <span class="fl">0.03</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 363500     24</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">sample_frac</span>(proporcion)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 10905    24</code></pre>
+</div>
+</div>
+<p>Además, se visualizan las distribuciones del resto de variables frente al tratamiento: En primer lugar se obtienen las distribuciones de las variables categóricas atendiendo al tratamiento aplicado:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">colnames</span>(df)) {</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.numeric</span>(df[[col]])) {</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes_string</span>(<span class="at">x =</span> col, <span class="at">fill =</span> <span class="st">"D"</span>)) <span class="sc">+</span> </span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) </span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(p)</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-31-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Se tiene que en las muestras presentes, salvo pequeñas diferencias en determinadas variables como los ingresos medios familiares, las distribuciones son similares.</p>
+<p>De igual manera, se representan las distribuciones de las variables categóricas en función del tratamiento:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">colnames</span>(df)) {</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.factor</span>(df[[col]])) {</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>    matriz_confusion <span class="ot">&lt;-</span> <span class="fu">table</span>(df<span class="sc">$</span>D,df[[col]])</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mosaicplot</span>(matriz_confusion, <span class="at">main=</span><span class="st">"Matriz de Confusión "</span> ,</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">xlab=</span><span class="st">"Loan Purpose"</span>, <span class="at">ylab=</span> col, <span class="at">color=</span><span class="cn">TRUE</span>,</span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">las=</span><span class="dv">1</span>, <span class="co"># Rotar etiquetas del eje y</span></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">cex.axis=</span><span class="fl">0.8</span>, <span class="co"># Tamaño de las etiquetas</span></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>               <span class="at">cex.lab=</span><span class="fl">0.9</span>, <span class="co"># Tamaño de las etiquetas de los ejes</span></span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">border=</span><span class="st">"darkgray"</span>) <span class="co"># Color de las líneas de los bordes</span></span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-32-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>De nuevo, salvo en variables como <code>preapproval name</code>, no existen diferencias considerables en ambos conjuntos.</p>
+<p>Por último, se genera un segundo dataframe que nos servirá para estudiar el efecto causal de ser de una raza blanca frente a no serlo, para así poder estudiar si existe discriminación en la concesión del préstamo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df_copia</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Definir la proporción deseada</span></span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>proporcion <span class="ot">&lt;-</span> <span class="fl">0.035</span></span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(df2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 363500     24</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Seleccionar aleatoriamente la proporción deseada de filas</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df2 <span class="sc">%&gt;%</span> <span class="fu">sample_frac</span>(proporcion)</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(df2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 12723    24</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>raza_white <span class="ot">&lt;-</span> df2<span class="sc">$</span>applicant_race_name_1 <span class="sc">==</span> <span class="st">"White"</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>raza_white <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(raza_white)</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>not_denied <span class="ot">&lt;-</span> df2<span class="sc">$</span>action_taken_name <span class="sc">==</span><span class="st">"Loan originated"</span></span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>not_denied <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(not_denied)</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(df2, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(applicant_race_name_1,action_taken_name))</span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>D <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(raza_white)</span>
+<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-12"><a href="#cb74-12" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>y <span class="ot">&lt;-</span> not_denied</span>
+<span id="cb74-13"><a href="#cb74-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-14"><a href="#cb74-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 24
+  agency_name                loan_type_name property_type_name loan_purpose_name
+  &lt;chr&gt;                      &lt;chr&gt;          &lt;chr&gt;              &lt;chr&gt;            
+1 Department of Housing and… Conventional   One-to-four famil… Refinancing      
+2 Consumer Financial Protec… Conventional   One-to-four famil… Refinancing      
+3 Department of Housing and… FHA-insured    One-to-four famil… Home improvement 
+4 Department of Housing and… Conventional   One-to-four famil… Home purchase    
+5 Consumer Financial Protec… Conventional   One-to-four famil… Refinancing      
+6 Consumer Financial Protec… Conventional   One-to-four famil… Refinancing      
+# ℹ 20 more variables: owner_occupancy_name &lt;chr&gt;, loan_amount_000s &lt;dbl&gt;,
+#   preapproval_name &lt;chr&gt;, applicant_ethnicity_name &lt;chr&gt;,
+#   co_applicant_ethnicity_name &lt;chr&gt;, co_applicant_race_name_1 &lt;chr&gt;,
+#   applicant_sex_name &lt;chr&gt;, co_applicant_sex_name &lt;chr&gt;,
+#   applicant_income_000s &lt;dbl&gt;, purchaser_type_name &lt;chr&gt;,
+#   hoepa_status_name &lt;chr&gt;, lien_status_name &lt;chr&gt;, population &lt;dbl&gt;,
+#   minority_population &lt;dbl&gt;, hud_median_family_income &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<p>Podemos representar graficamente la matriz de confusión de tratamiento vs respuesta, y en este caso se aprecia un claro desvalanceo de las clases, siendo mayor la proporción de individuos de raza blanca.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>matriz_confusion <span class="ot">&lt;-</span> <span class="fu">table</span>(df2<span class="sc">$</span>D, df2<span class="sc">$</span>y)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>matriz_confusion</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+       0    1
+  0 1773 2179
+  1 3321 5450</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mosaicplot</span>(matriz_confusion, <span class="at">main=</span><span class="st">"Matriz de Confusión: Race vs Action Taken"</span>,</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab=</span><span class="st">"Race"</span>, <span class="at">ylab=</span><span class="st">"Action Taken"</span>, <span class="at">color=</span><span class="cn">TRUE</span>,</span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">las=</span><span class="dv">1</span>, </span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">cex.axis=</span><span class="fl">0.8</span>, </span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">cex.lab=</span><span class="fl">0.9</span>, </span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">border=</span><span class="st">"darkgray"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>De nuevo, se representan las distribuciones del resto de las clases:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>df_aux <span class="ot">&lt;-</span>  df2</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">colnames</span>(df2)) {</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.character</span>(df2[[col]])) {</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>    df_aux[[col]] <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(df_aux[[col]])</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df_aux</span>
+<span id="cb79-9"><a href="#cb79-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-10"><a href="#cb79-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-11"><a href="#cb79-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">colnames</span>(df2)) {</span>
+<span id="cb79-12"><a href="#cb79-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.numeric</span>(df2[[col]])) {</span>
+<span id="cb79-13"><a href="#cb79-13" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df2, <span class="fu">aes_string</span>(<span class="at">x =</span> col, <span class="at">fill =</span> <span class="st">"D"</span>)) <span class="sc">+</span> </span>
+<span id="cb79-14"><a href="#cb79-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) </span>
+<span id="cb79-15"><a href="#cb79-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(p)</span>
+<span id="cb79-16"><a href="#cb79-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb79-17"><a href="#cb79-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">is.factor</span>(df2[[col]])){</span>
+<span id="cb79-18"><a href="#cb79-18" aria-hidden="true" tabindex="-1"></a>        matriz_confusion <span class="ot">&lt;-</span> <span class="fu">table</span>(df2<span class="sc">$</span>D,df2[[col]])</span>
+<span id="cb79-19"><a href="#cb79-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-20"><a href="#cb79-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mosaicplot</span>(matriz_confusion, <span class="at">main=</span><span class="st">"Matriz de Confusión "</span> ,</span>
+<span id="cb79-21"><a href="#cb79-21" aria-hidden="true" tabindex="-1"></a>               <span class="at">xlab=</span><span class="st">"Loan Purpose"</span>, <span class="at">ylab=</span> col, <span class="at">color=</span><span class="cn">TRUE</span>,</span>
+<span id="cb79-22"><a href="#cb79-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">las=</span><span class="dv">1</span>,</span>
+<span id="cb79-23"><a href="#cb79-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">cex.axis=</span><span class="fl">0.8</span>, </span>
+<span id="cb79-24"><a href="#cb79-24" aria-hidden="true" tabindex="-1"></a>               <span class="at">cex.lab=</span><span class="fl">0.9</span>, </span>
+<span id="cb79-25"><a href="#cb79-25" aria-hidden="true" tabindex="-1"></a>               <span class="at">border=</span><span class="st">"darkgray"</span>) </span>
+<span id="cb79-26"><a href="#cb79-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb79-27"><a href="#cb79-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-16.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-17.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-18.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-19.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-20.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-21.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-22.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-23.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-36-24.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>En este caso se observan que las distribuciones de cada una de las varaibles en función del tratamiento en este caso son mayores que con el tratamiento anterior,lo que supondrá un mayor reto de cara a la elección de un método de emparejamiento que obtenga muestras cuya distribución de X sea lo más parecida posible para tratados y no tratados.</p>
+</section>
+<section id="selección-de-instancias-mediante-pareamiento" class="level2">
+<h2 class="anchored" data-anchor-id="selección-de-instancias-mediante-pareamiento">Selección de instancias mediante pareamiento</h2>
+<p>A continuación, se evalua la diferencia de medias agrupando por el tratamiento aplicado, para así obtener el estimador sesgado por diferencia de medias:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 24
+  agency_name             loan_type_name property_type_name owner_occupancy_name
+  &lt;fct&gt;                   &lt;fct&gt;          &lt;fct&gt;              &lt;fct&gt;               
+1 Consumer Financial Pro… Conventional   One-to-four famil… Owner-occupied as a…
+2 Department of Housing … VA-guaranteed  Manufactured hous… Owner-occupied as a…
+3 Consumer Financial Pro… Conventional   One-to-four famil… Owner-occupied as a…
+4 National Credit Union … Conventional   One-to-four famil… Owner-occupied as a…
+5 Consumer Financial Pro… Conventional   One-to-four famil… Owner-occupied as a…
+6 Department of Housing … Conventional   One-to-four famil… Owner-occupied as a…
+# ℹ 20 more variables: loan_amount_000s &lt;dbl&gt;, preapproval_name &lt;fct&gt;,
+#   applicant_ethnicity_name &lt;fct&gt;, co_applicant_ethnicity_name &lt;fct&gt;,
+#   applicant_race_name_1 &lt;fct&gt;, co_applicant_race_name_1 &lt;fct&gt;,
+#   applicant_sex_name &lt;fct&gt;, co_applicant_sex_name &lt;fct&gt;,
+#   applicant_income_000s &lt;dbl&gt;, purchaser_type_name &lt;fct&gt;,
+#   hoepa_status_name &lt;fct&gt;, lien_status_name &lt;fct&gt;, population &lt;dbl&gt;,
+#   minority_population &lt;dbl&gt;, hud_median_family_income &lt;dbl&gt;, …</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>medias_por_grupo <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(D) <span class="sc">%&gt;%</span></span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">media_valor =</span> <span class="fu">mean</span>(y))</span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(medias_por_grupo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  D     media_valor
+  &lt;fct&gt;       &lt;dbl&gt;
+1 0           0.674
+2 1           0.530</code></pre>
+</div>
+</div>
+<p>Este estimador sesgado revela que existen diferencias de medias entre los dos grupos, en este caso que el tratamiento produce un efecto negativo en la variable respuesta, por lo que se tiene que mediante este estimador sesgado, <code>loan purpose</code> = “Refinancing” disminuye la probabilidad de conceder el prestamo.</p>
+<p>Dado que la condición de independencia no ha de cumplirse, necesitamos aplicar otros métodos en este caso para estudiar el efecto del tratamiento.</p>
+<p>Es por ello que aplicaremos emparejamiento como selección de muestras y, en base a un supuesto de independencia condicional, estudiaremos el efecto causal de D sobre Y dado X, donde X son el resto de variables observables.</p>
+<p>Se usan dos emparejamientos distintos y se comparan los resultados. En primer lugar, se hace uso de <code>propensity score distance</code> como métrica de distancia y como método de emparejamiento se usa el <code>knn</code>, de tal forma que se puedan obtener instancias no tratadas lo mñas parecidas posibles a las tratadas.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>m.ps.nn<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">matchit</span>(y <span class="sc">~</span> agency_name <span class="sc">+</span></span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>            property_type_name <span class="sc">+</span> loan_amount_000s <span class="sc">+</span> </span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>            applicant_ethnicity_name <span class="sc">+</span> applicant_race_name_1 <span class="sc">+</span> </span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>              applicant_sex_name <span class="sc">+</span>applicant_income_000s <span class="sc">+</span>hoepa_status_name <span class="sc">+</span>population <span class="sc">+</span></span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>              hud_median_family_income<span class="sc">+</span>number_of_owner_occupied_units <span class="sc">+</span> loan_type_name <span class="sc">+</span> </span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>              owner_occupancy_name <span class="sc">+</span> preapproval_name <span class="sc">+</span> co_applicant_ethnicity_name <span class="sc">+</span></span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a>              co_applicant_sex_name <span class="sc">+</span> purchaser_type_name <span class="sc">+</span> </span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a>              lien_status_name <span class="sc">+</span> minority_population <span class="sc">+</span> tract_to_msamd_income <span class="sc">+</span> </span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a>              number_of_1_to_4_family_units,</span>
+<span id="cb84-11"><a href="#cb84-11" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method=</span><span class="st">"nearest"</span>,</span>
+<span id="cb84-12"><a href="#cb84-12" aria-hidden="true" tabindex="-1"></a>                  <span class="at">distance=</span><span class="st">"cbps"</span>,</span>
+<span id="cb84-13"><a href="#cb84-13" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data=</span>df) </span>
+<span id="cb84-14"><a href="#cb84-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-15"><a href="#cb84-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-16"><a href="#cb84-16" aria-hidden="true" tabindex="-1"></a>m.ps.nn<span class="fl">.1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>A matchit object
+ - method: 1:1 nearest neighbor matching without replacement
+ - distance: Propensity score
+             - estimated with CBPS
+ - number of obs.: 10905 (original), 8446 (matched)
+ - target estimand: ATT
+ - covariates: agency_name, property_type_name, loan_amount_000s, applicant_ethnicity_name, applicant_race_name_1, applicant_sex_name, applicant_income_000s, hoepa_status_name, population, hud_median_family_income, number_of_owner_occupied_units, loan_type_name, owner_occupancy_name, preapproval_name, co_applicant_ethnicity_name, co_applicant_sex_name, purchaser_type_name, lien_status_name, minority_population, tract_to_msamd_income, number_of_1_to_4_family_units</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cobalt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code> cobalt (Version 4.5.5, Build Date: 2024-04-02)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Adjuntando el paquete: 'cobalt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:MatchIt':
+
+    lalonde</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m.ps.nn<span class="fl">.1</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Para un segundo emparejamiento, hacemos uso de mahalanobis para las distancias y aplicamos knn, dado que esta métrica de distancia tiene en cuenta la escala de cada variable, y en nuestro caso estas no estan normalizadas en una misma escala.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>m.ps.nn<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">matchit</span>(y <span class="sc">~</span> agency_name <span class="sc">+</span></span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>            property_type_name <span class="sc">+</span> loan_amount_000s <span class="sc">+</span> </span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>            applicant_ethnicity_name <span class="sc">+</span> applicant_race_name_1 <span class="sc">+</span> </span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>              applicant_sex_name <span class="sc">+</span>applicant_income_000s <span class="sc">+</span>hoepa_status_name <span class="sc">+</span>population <span class="sc">+</span></span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>              hud_median_family_income<span class="sc">+</span>number_of_owner_occupied_units <span class="sc">+</span> loan_type_name <span class="sc">+</span> </span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>              owner_occupancy_name <span class="sc">+</span> preapproval_name <span class="sc">+</span> co_applicant_ethnicity_name <span class="sc">+</span></span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>              co_applicant_sex_name <span class="sc">+</span> purchaser_type_name <span class="sc">+</span> </span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>              lien_status_name <span class="sc">+</span> minority_population <span class="sc">+</span> tract_to_msamd_income <span class="sc">+</span> </span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>              number_of_1_to_4_family_units,</span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method=</span><span class="st">"nearest"</span>,</span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>                  <span class="at">distance=</span><span class="st">"mahalanobis"</span>,</span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data=</span>df,</span>
+<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">replace =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb91-14"><a href="#cb91-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-15"><a href="#cb91-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-16"><a href="#cb91-16" aria-hidden="true" tabindex="-1"></a>m.ps.nn<span class="fl">.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>A matchit object
+ - method: 1:1 nearest neighbor matching with replacement
+ - distance: Mahalanobis
+ - number of obs.: 10905 (original), 8959 (matched)
+ - target estimand: ATT
+ - covariates: agency_name, property_type_name, loan_amount_000s, applicant_ethnicity_name, applicant_race_name_1, applicant_sex_name, applicant_income_000s, hoepa_status_name, population, hud_median_family_income, number_of_owner_occupied_units, loan_type_name, owner_occupancy_name, preapproval_name, co_applicant_ethnicity_name, co_applicant_sex_name, purchaser_type_name, lien_status_name, minority_population, tract_to_msamd_income, number_of_1_to_4_family_units</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m.ps.nn<span class="fl">.2</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Para realizar el emparejamiento para estudiar el efecto causal de la raza, se repite el procedimiento, usando los mismos métodos y métricas de distancia:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>m2.ps.nn<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">matchit</span>(y <span class="sc">~</span> agency_name <span class="sc">+</span></span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>            property_type_name <span class="sc">+</span> loan_amount_000s <span class="sc">+</span> </span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>            applicant_ethnicity_name <span class="sc">+</span> </span>
+<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>              applicant_sex_name <span class="sc">+</span>applicant_income_000s <span class="sc">+</span>hoepa_status_name <span class="sc">+</span>population <span class="sc">+</span></span>
+<span id="cb94-5"><a href="#cb94-5" aria-hidden="true" tabindex="-1"></a>              hud_median_family_income<span class="sc">+</span>number_of_owner_occupied_units <span class="sc">+</span> loan_type_name <span class="sc">+</span> </span>
+<span id="cb94-6"><a href="#cb94-6" aria-hidden="true" tabindex="-1"></a>              owner_occupancy_name <span class="sc">+</span> preapproval_name <span class="sc">+</span> co_applicant_ethnicity_name <span class="sc">+</span></span>
+<span id="cb94-7"><a href="#cb94-7" aria-hidden="true" tabindex="-1"></a>              co_applicant_sex_name <span class="sc">+</span> purchaser_type_name <span class="sc">+</span> </span>
+<span id="cb94-8"><a href="#cb94-8" aria-hidden="true" tabindex="-1"></a>              lien_status_name <span class="sc">+</span> minority_population <span class="sc">+</span> tract_to_msamd_income <span class="sc">+</span> </span>
+<span id="cb94-9"><a href="#cb94-9" aria-hidden="true" tabindex="-1"></a>              number_of_1_to_4_family_units,</span>
+<span id="cb94-10"><a href="#cb94-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method=</span><span class="st">"nearest"</span>,</span>
+<span id="cb94-11"><a href="#cb94-11" aria-hidden="true" tabindex="-1"></a>                  <span class="at">distance=</span><span class="st">"cbps"</span>,</span>
+<span id="cb94-12"><a href="#cb94-12" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data=</span>df2) </span>
+<span id="cb94-13"><a href="#cb94-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb94-14"><a href="#cb94-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb94-15"><a href="#cb94-15" aria-hidden="true" tabindex="-1"></a>m2.ps.nn<span class="fl">.1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>A matchit object
+ - method: 1:1 nearest neighbor matching without replacement
+ - distance: Propensity score
+             - estimated with CBPS
+ - number of obs.: 12723 (original), 10188 (matched)
+ - target estimand: ATT
+ - covariates: agency_name, property_type_name, loan_amount_000s, applicant_ethnicity_name, applicant_sex_name, applicant_income_000s, hoepa_status_name, population, hud_median_family_income, number_of_owner_occupied_units, loan_type_name, owner_occupancy_name, preapproval_name, co_applicant_ethnicity_name, co_applicant_sex_name, purchaser_type_name, lien_status_name, minority_population, tract_to_msamd_income, number_of_1_to_4_family_units</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m2.ps.nn<span class="fl">.1</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>m2.ps.nn<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">matchit</span>(y <span class="sc">~</span> agency_name <span class="sc">+</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>            property_type_name <span class="sc">+</span> loan_amount_000s <span class="sc">+</span> </span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>            applicant_ethnicity_name<span class="sc">+</span> </span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>              applicant_sex_name <span class="sc">+</span>applicant_income_000s <span class="sc">+</span>hoepa_status_name <span class="sc">+</span>population <span class="sc">+</span></span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>              hud_median_family_income<span class="sc">+</span>number_of_owner_occupied_units <span class="sc">+</span> loan_type_name <span class="sc">+</span> </span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>              owner_occupancy_name <span class="sc">+</span> preapproval_name <span class="sc">+</span> co_applicant_ethnicity_name <span class="sc">+</span></span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>              co_applicant_sex_name <span class="sc">+</span> purchaser_type_name <span class="sc">+</span> </span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>              lien_status_name <span class="sc">+</span> minority_population <span class="sc">+</span> tract_to_msamd_income <span class="sc">+</span> </span>
+<span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a>              number_of_1_to_4_family_units,</span>
+<span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method=</span><span class="st">"nearest"</span>,</span>
+<span id="cb97-11"><a href="#cb97-11" aria-hidden="true" tabindex="-1"></a>                  <span class="at">distance=</span><span class="st">"mahalanobis"</span>,</span>
+<span id="cb97-12"><a href="#cb97-12" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data=</span>df2,</span>
+<span id="cb97-13"><a href="#cb97-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">replace =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb97-14"><a href="#cb97-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-15"><a href="#cb97-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-16"><a href="#cb97-16" aria-hidden="true" tabindex="-1"></a>m2.ps.nn<span class="fl">.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>A matchit object
+ - method: 1:1 nearest neighbor matching with replacement
+ - distance: Mahalanobis
+ - number of obs.: 12723 (original), 10281 (matched)
+ - target estimand: ATT
+ - covariates: agency_name, property_type_name, loan_amount_000s, applicant_ethnicity_name, applicant_sex_name, applicant_income_000s, hoepa_status_name, population, hud_median_family_income, number_of_owner_occupied_units, loan_type_name, owner_occupancy_name, preapproval_name, co_applicant_ethnicity_name, co_applicant_sex_name, purchaser_type_name, lien_status_name, minority_population, tract_to_msamd_income, number_of_1_to_4_family_units</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(m2.ps.nn<span class="fl">.2</span>,<span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"m"</span>,<span class="st">"var"</span>,<span class="st">"ks"</span>), </span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">abs =</span> <span class="cn">TRUE</span>,<span class="at">thresholds=</span><span class="fu">c</span>(<span class="at">m=</span><span class="fl">0.1</span>,<span class="at">ks=</span><span class="fl">0.05</span>,<span class="at">var=</span><span class="dv">2</span>),</span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">stars =</span> <span class="st">"std"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="parte1_trabajo_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>El emparejamiento es decente en ambos casos, y en la gran mayoria de variables se obtienen muestras con distribuciones de X equivalentes para tanto tratados como no tratados, en cambio existen algunas variables donde (<em>Nota: se ha probado con diferentes métricas de distancia y métodos de emparejamiento diferentes, pero no se ha logrado solucionar este problema en este notebook, aunque en la parte dos de nuestro trabajo en python no está presente</em>).Este podría mejorarse haciendo uso de una mayor proporción del conjunto de datos para el emparejamiento (<em>De aumentarse este tamaño el tiempo de computación se dispara y no se alcanza una solución.</em>)</p>
+</section>
+<section id="evaluación-del-efecto-del-tratamiento" class="level2">
+<h2 class="anchored" data-anchor-id="evaluación-del-efecto-del-tratamiento">Evaluación del efecto del tratamiento</h2>
+<p>En primer lugar, se evalua el efecto causal obtenido por diferencia de medias tras el primer emparejamiento:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>m.data <span class="ot">&lt;-</span> <span class="fu">match.data</span>(m.ps.nn<span class="fl">.1</span>)</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>m.data <span class="sc">%&gt;%</span> </span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(D) <span class="sc">%&gt;%</span> </span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  D     `mean(y)`
+  &lt;fct&gt;     &lt;dbl&gt;
+1 0         0.564
+2 1         0.419</code></pre>
+</div>
+</div>
+<p>Como resultado tenemos que la probabilidad de no conceder el prestamo una vez emparejado el dataset es aun menor en el caso de que su purpose = “Refinancing” que en el caso contrario. Dado que el emparejamiento en el caso 1 es bueno, ya que las distribuciones de X son muy parecidas en tratados y no tratados, podemos decir que a efectos globales en la muestra el efecto causal de refinanciar reduce la probabilidad de conceder el préstamo (A falta de un intervalo de confianza que nos aporte evidencia estadística significativa). Es importante destacar que pueden existir efectos heterogéneos que se estudiaran en el siguiente notebook donde existan diferencias en el efecto del tratamiento dado X, de distinto valor al del efecto global calculado.</p>
+<p>Se evalua el efecto presente en el segundo emparejamiento:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>m.data <span class="ot">&lt;-</span> <span class="fu">match.data</span>(m.ps.nn<span class="fl">.2</span>)</span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a>m.data <span class="sc">%&gt;%</span> </span>
+<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(D) <span class="sc">%&gt;%</span> </span>
+<span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  D     `mean(y)`
+  &lt;fct&gt;     &lt;dbl&gt;
+1 0         0.802
+2 1         0.665</code></pre>
+</div>
+</div>
+<p>De nuevo, el efecto en este caso es negativo, aunque en este caso los emparejamientos han obtenido probabilidades bastante mayores de la concesión del credito, aunque la proporción de reducción de probabilidad al palicar el tratamiento continua siendo la misma.</p>
+<p>Cabe destacar que solo estamos teniendo en cuenta el efecto a nivel global, sin realizar distinciones entre posibles grupos donde los efectos sean heterogéneos.</p>
+<section id="segundo-estudio-de-la-inferencia-causal" class="level3">
+<h3 class="anchored" data-anchor-id="segundo-estudio-de-la-inferencia-causal">Segundo estudio de la inferencia causal</h3>
+<p>En segundo lugar, se repite el procedimiento qeu estudia si la raza de la persona es un factor de discriminación para la concesión del préstamo, ya que como se indica en la pagina web donde se encuentra el dataset, una de las aplicaciones del mismo era la detección de posibles factores de discriminación.</p>
+<p>Para el primer emparejamiento, los resultados son los siguientes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>m.data <span class="ot">&lt;-</span> <span class="fu">match.data</span>(m2.ps.nn<span class="fl">.1</span>)</span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb104-3"><a href="#cb104-3" aria-hidden="true" tabindex="-1"></a>m.data <span class="sc">%&gt;%</span> </span>
+<span id="cb104-4"><a href="#cb104-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(D) <span class="sc">%&gt;%</span> </span>
+<span id="cb104-5"><a href="#cb104-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  D     `mean(y)`
+  &lt;fct&gt;     &lt;dbl&gt;
+1 0         0.439
+2 1         0.527</code></pre>
+</div>
+</div>
+<p>En cuanto al emparejamiento realizado usando la distancia de mahalanobis como métrica de distancia, los resultados son:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>m.data <span class="ot">&lt;-</span> <span class="fu">match.data</span>(m2.ps.nn<span class="fl">.2</span>)</span>
+<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb106-3"><a href="#cb106-3" aria-hidden="true" tabindex="-1"></a>m.data <span class="sc">%&gt;%</span> </span>
+<span id="cb106-4"><a href="#cb106-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(D) <span class="sc">%&gt;%</span> </span>
+<span id="cb106-5"><a href="#cb106-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  D     `mean(y)`
+  &lt;fct&gt;     &lt;dbl&gt;
+1 0         0.715
+2 1         0.753</code></pre>
+</div>
+</div>
+<p>Se puede observar que ambos emparejamientos indican que si la raza del solicitante del préstamo no es blanca, la probabilidad de la concesión del mismo es menor, reflejando una clara discriminación, de nuevo a falta de intervalos de confianza o estudio de efectos heterogéneos.</p>
+</section>
+</section>
+<section id="conclusiones-del-estudio-mediante-matching" class="level2">
+<h2 class="anchored" data-anchor-id="conclusiones-del-estudio-mediante-matching">Conclusiones del estudio mediante matching</h2>
+<p>A lo largo de esta primera parte del trabajo hemos sido capaces de, a partir de datos observacionales de un conjunto de datos real, determinar efectos globales de dos variables que actuan como tratamiento sobre la variable que indica si al individuo se le concede un prestamo.</p>
+<p>Este efecto causal lo obtenemos mediante técnicas como el emparejamiento, que a partir del valor del propensity score o la distancia entre muestras nos permite obtener pares de muestras que mantengan distribuciones en X similares. A partir de esta selección de muestras obtenemos el efecto global, sin tener en cuenta posibles efectos heterogéneos del tratamiento.</p>
+<p>Se tiene que el efecto global de que el objetivo del prestamo sea refinanciar tiene un efecto sobre la concesión del mismo que indica que las probabilidades de ser rechazado son mayores. Cabe destacar que mediante el método aplicado no permite recuperar el intervalo de confianza necesario, algo que solucionaremos con los métodos del siguiente notebook.</p>
+<p>En cuanto a la discriminación por razas, se tiene que, de nuevo a falta de intervalos de confianza, que existe discriminación para razas distintas a la blanca en la concesión de un préstamo.</p>
+<p>En el siguiente notebook, se aplicarán procedimientos que nos permitirán averigar si existen efectos heterogeneos y nos permitirán acotar la influencia de no observables, que no es considerada mediante el método aplicado en esta primera parte, además de obtener intervalos de confianza que evidencien si cada uno de los tratamientos tiene un efecto estadísticamente significativo, algo no calculable únicamente mediante diferencia de medias tras el emparejamiento.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
